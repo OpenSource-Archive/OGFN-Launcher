@@ -12,6 +12,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import Sidebar from "@/components/layout/Sidebar";
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { endpoints } from "@/lib/api/splash-endpoints";
 
 interface NewsItem {
   id: string;
@@ -126,19 +127,20 @@ export default function HomePage() {
       }
     };
 
-    const fetchCommits = async () => {
-      try {
-        const res = await apiClient.get(API_ENDPOINTS.launcher.commits);
-        setCommits(res.data.commits || []);
-      } catch {
-        setCommits([]);
-      }
-    };
-
     fetchStatus();
     fetchNews();
     fetchFriends();
-    fetchCommits();
+
+    const streamUrl = `${endpoints.GET_COMMITS_STREAM}`;
+    const sse = new EventSource(streamUrl);
+    sse.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        setCommits(data.commits || []);
+      } catch {
+      }
+    };
+    sse.onerror = () => sse.close();
 
     const heartbeat = async () => {
       if (user?.accountId) {
@@ -155,8 +157,11 @@ export default function HomePage() {
       fetchStatus();
       fetchFriends();
       heartbeat();
-    }, 60000);
-    return () => clearInterval(interval);
+    }, 15000);
+    return () => {
+      clearInterval(interval);
+      sse.close();
+    };
   }, [user?.accountId]);
 
   const heroNews = news[0] ?? { title: "Welcome to Splash", body: "A custom Fortnite private server experience built for the community.", image: "/news.png" };

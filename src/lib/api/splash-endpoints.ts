@@ -11,6 +11,7 @@ export const endpoints = {
   GET_LAUNCHER_NEWS: `${BASE_URL}/launcher/news`,
   GET_SHOP: `${BASE_URL}/shop/items`,
   GET_COMMITS: `${BASE_URL}/launcher/commits`,
+  GET_COMMITS_STREAM: `${BASE_URL}/launcher/commits/stream`,
   GET_GENERATE_ACCOUNT_RESP: `${BASE_URL}/splash/api/v2/launcher/account`,
   GET_ACTIVE_CHECK: `${BASE_URL}/splash/api/v2/launcher/account/active`,
   POST_EDIT_DISPLAYNAME: `${BASE_URL}/splash/api/v2/launcher/account/edit/display`,
