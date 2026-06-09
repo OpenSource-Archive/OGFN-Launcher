@@ -1,18 +1,9 @@
-const isProd = process.env.NODE_ENV === 'production';
+const WebpackObfuscator = require('webpack-obfuscator');
 
-const internalHost = process.env.TAURI_DEV_HOST || 'localhost';
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  assetPrefix: isProd ? undefined : `http://${internalHost}:3000`,
-  webpack: (config: any, { isServer }: { isServer: boolean }) => {
-    // Only obfuscate client-side code in production
-    if (!isServer && isProd) {
-      const WebpackObfuscator = require('webpack-obfuscator');
+module.exports = {
+  webpack: (config, { isServer }) => {
+    // Only obfuscate client-side code
+    if (!isServer) {
       config.plugins.push(
         new WebpackObfuscator({
           rotateStringArray: true,
@@ -23,7 +14,7 @@ const nextConfig = {
           controlFlowFlatteningThreshold: 0.75,
           deadCodeInjection: true,
           deadCodeInjectionThreshold: 0.4,
-          debugProtection: true,
+          debugProtection: false, // Set to true for production
           debugProtectionInterval: 0,
           disableConsoleOutput: true,
           identifierNamesGenerator: 'hexadecimal',
@@ -43,5 +34,3 @@ const nextConfig = {
     return config;
   },
 };
-
-export default nextConfig;
