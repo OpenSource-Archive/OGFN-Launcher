@@ -5,6 +5,7 @@ import {
   Home,
   FolderOpen,
   ShoppingBag,
+  Trophy,
   Settings,
 } from "lucide-react";
 
@@ -12,6 +13,7 @@ const navItems = [
   { label: "Home", path: "/home", icon: Home },
   { label: "Library", path: "/library", icon: FolderOpen },
   { label: "Shop", path: "/shop", icon: ShoppingBag },
+  { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
 ];
 
 export default function Sidebar() {
