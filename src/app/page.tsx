@@ -13,7 +13,7 @@ import {
   Eye,
   EyeOff,
 
-  //lmao
+  // Test Discord Changelogs
 } from "lucide-react";
 import { endpoints } from "@/lib/api/splash-endpoints";
 import { useSessionStore } from "@/lib/stores/session";
