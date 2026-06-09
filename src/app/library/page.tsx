@@ -105,12 +105,12 @@ export default function LibraryPage() {
                   onMouseEnter={() => setHoveredBuild(build.path)}
                   onMouseLeave={() => setHoveredBuild(null)}
                 >
-                  <button
-                    className="w-full h-full text-left focus:outline-none cursor-pointer"
+                  <div
+                    className="w-full h-full text-left cursor-pointer"
                     onClick={() => {
-                      handlelaunchBuild(build.path, build.version);
+                      if (activeBuild === null || isActive) handlelaunchBuild(build.path, build.version);
                     }}
-                    disabled={activeBuild !== null && !isActive}
+                    style={{ opacity: activeBuild !== null && !isActive ? 0.5 : 1, pointerEvents: activeBuild !== null && !isActive ? "none" : "auto" }}
                   >
                     <div className="relative">
                       <img
@@ -158,7 +158,7 @@ export default function LibraryPage() {
                         </button>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 </div>
               );
             })}

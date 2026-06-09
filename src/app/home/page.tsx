@@ -48,12 +48,16 @@ interface Commit {
   author: string;
   date: string;
   url: string;
+  repo?: string;
 }
 
 export default function HomePage() {
   const router = useRouter();
   const session = useSessionStore();
   const legacyAuth = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const getStoredUser = () => {
     try {
@@ -64,7 +68,7 @@ export default function HomePage() {
     return null;
   };
 
-  const user = session.user || legacyAuth.user || getStoredUser();
+  const user = mounted ? (session.user || legacyAuth.user || getStoredUser()) : null;
   const athena = session.athena;
   const commonCore = session.common_core || legacyAuth.commonCore;
   const [status, setStatus] = useState<LauncherStatus>({
