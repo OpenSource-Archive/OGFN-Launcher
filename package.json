@@ -7,7 +7,7 @@
     "build": "next build",
     "build:obfuscated": "set OBFUSCATE=true&& next build",
     "tauri": "tauri",
-    "tauri:build": "npm run build:obfuscated && tauri build",
+    "tauri:build": "npm run build && tauri build",
     "lint": "next lint"
   },
   "dependencies": {
