@@ -1,0 +1,409 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  Newspaper, Play, ArrowRight, ExternalLink,
+  Trophy, Target, TrendingUp, Wallet, Star, Users
+} from "lucide-react";
+import { useSessionStore } from "@/lib/stores/session";
+import { useAuthStore } from "@/lib/stores/auth";
+import Sidebar from "@/components/layout/Sidebar";
+import { apiClient } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
+
+interface NewsItem {
+  id: string;
+  title: string;
+  body: string;
+  image: string;
+}
+
+interface LauncherStatus {
+  playersOnline: number;
+  activeLauncherUsers: number;
+  version: string;
+  status: string;
+}
+
+interface PlayerStats {
+  level: number;
+  xp: number;
+  bookLevel: number;
+  vBucks: number;
+}
+
+interface Friend {
+  id: string;
+  username: string;
+  status: "online" | "playing" | "away" | "offline";
+  location?: string;
+}
+
+interface Commit {
+  id: string;
+  message: string;
+  author: string;
+  date: string;
+  url: string;
+}
+
+export default function HomePage() {
+  const router = useRouter();
+  const session = useSessionStore();
+  const legacyAuth = useAuthStore();
+
+  const getStoredUser = () => {
+    try {
+      const raw = localStorage.getItem("splash.auth.user");
+      if (raw) return JSON.parse(raw);
+    } catch {
+    }
+    return null;
+  };
+
+  const user = session.user || legacyAuth.user || getStoredUser();
+  const athena = session.athena;
+  const commonCore = session.common_core || legacyAuth.commonCore;
+  const [status, setStatus] = useState<LauncherStatus>({
+    playersOnline: 0,
+    activeLauncherUsers: 0,
+    version: "1.0.0",
+    status: "online",
+  });
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [commits, setCommits] = useState<Commit[]>([]);
+  const [stats, setStats] = useState<PlayerStats>({
+    level: 0,
+    xp: 0,
+    bookLevel: 0,
+    vBucks: 0,
+  });
+  useEffect(() => {
+    setStats({
+      level: athena?.level ?? 0,
+      xp: athena?.xp ?? 0,
+      bookLevel: athena?.book_level ?? 0,
+      vBucks: commonCore?.vBucks ?? 0,
+    });
+  }, [athena, commonCore]);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.launcher.status);
+        setStatus(res.data);
+      } catch {
+      }
+    };
+
+    const fetchNews = async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.launcher.news);
+        setNews(res.data.news || []);
+      } catch {
+        setNews([]);
+      }
+    };
+
+    const fetchFriends = async () => {
+      try {
+        const accountId = user?.accountId;
+        if (!accountId) return;
+        const res = await apiClient.get(`/friends/api/public/friends/${accountId}`);
+        const data = res.data || [];
+        const mapped: Friend[] = data.map((f: any) => ({
+          id: f.accountId || f.id,
+          username: f.displayName || f.username || "Unknown",
+          status: f.status || "offline",
+          location: f.location,
+        }));
+        setFriends(mapped);
+      } catch {
+        setFriends([]);
+      }
+    };
+
+    const fetchCommits = async () => {
+      try {
+        const res = await apiClient.get(API_ENDPOINTS.launcher.commits);
+        setCommits(res.data.commits || []);
+      } catch {
+        setCommits([]);
+      }
+    };
+
+    fetchStatus();
+    fetchNews();
+    fetchFriends();
+    fetchCommits();
+
+    const heartbeat = async () => {
+      if (user?.accountId) {
+        try {
+          await apiClient.post("/launcher/heartbeat", { accountId: user.accountId });
+        } catch {
+        }
+      }
+    };
+
+    heartbeat();
+
+    const interval = setInterval(() => {
+      fetchStatus();
+      fetchFriends();
+      heartbeat();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [user?.accountId]);
+
+  const heroNews = news[0];
+
+  return (
+    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+      <Sidebar />
+
+      <motion.main
+        className="flex-1 flex flex-col overflow-y-auto"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <div className="flex justify-between items-center px-6 pt-5 pb-2">
+          <h1 className="text-2xl font-bold text-white">Home</h1>
+
+          <div className="rounded-xl bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg p-3 w-60">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-cyan-400 to-emerald-400 flex items-center justify-center">
+                  <span className="text-xs font-bold text-black">
+                    {(user?.displayName || user?.username || "P").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-[#05070a]" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="font-medium text-white text-xs">
+                  {user?.displayName || user?.username || "Player"}
+                </h3>
+                <span className="text-[11px] text-gray-400">Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 space-y-3">
+          {heroNews && (
+            <div className="relative h-[200px] overflow-hidden rounded-xl shadow-lg group cursor-pointer" onClick={() => router.push("/library")}>
+              <div className="absolute inset-0">
+                <img
+                  src={heroNews.image}
+                  alt={heroNews.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/news.pngfo";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+
+              <div className="absolute bottom-3 right-3">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push("/library");
+                  }}
+                  className="w-12 h-12 bg-cyan-500 hover:bg-cyan-400 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/30 transition-all hover:scale-110"
+                >
+                  <Play className="w-5 h-5 text-black fill-black ml-0.5" />
+                </button>
+              </div>
+
+              <div className="absolute bottom-3 left-4 max-w-[70%]">
+                <h2 className="text-sm font-bold text-white truncate">
+                  {heroNews.title}
+                </h2>
+                <p className="text-[11px] text-gray-300/80 line-clamp-1">
+                  {heroNews.body}
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col lg:flex-row gap-3">
+            <div className="flex-1 bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-cyan-400 mb-3 flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5" />
+                Your Stats
+              </h2>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-md bg-cyan-500/20 flex items-center justify-center">
+                      <Star className="w-3.5 h-3.5 text-cyan-400" />
+                    </div>
+                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">Level</span>
+                  </div>
+                  <p className="text-xl font-bold text-white">{stats.level}</p>
+                  <div className="mt-1.5 h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-cyan-500 rounded-full"
+                      style={{ width: `${Math.min((stats.xp % 10000) / 10000 * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-md bg-emerald-500/20 flex items-center justify-center">
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">XP</span>
+                  </div>
+                  <p className="text-xl font-bold text-white">{stats.xp.toLocaleString()}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">total earned</p>
+                </div>
+                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-md bg-purple-500/20 flex items-center justify-center">
+                      <Trophy className="w-3.5 h-3.5 text-purple-400" />
+                    </div>
+                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">Battle Pass</span>
+                  </div>
+                  <p className="text-xl font-bold text-white">{stats.bookLevel}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">tier unlocked</p>
+                </div>
+                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-md bg-yellow-500/20 flex items-center justify-center">
+                      <Wallet className="w-3.5 h-3.5 text-yellow-400" />
+                    </div>
+                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">V-Bucks</span>
+                  </div>
+                  <p className="text-xl font-bold text-white">{stats.vBucks.toLocaleString()}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">balance</p>
+                </div>
+              </div>
+            </div>
+            <div className="w-full lg:w-[280px] space-y-3">
+              <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+                <h2 className="text-sm font-semibold text-cyan-400 mb-2">Status</h2>
+                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        status.status === "online"
+                          ? "bg-green-400"
+                          : status.status === "maintenance"
+                          ? "bg-yellow-400"
+                          : "bg-red-400"
+                      }`}
+                    />
+                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">
+                      {status.status}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{status.playersOnline}</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">players in-game</p>
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
+                  <Users className="w-3 h-3 text-cyan-400" />
+                  <span>{status.activeLauncherUsers ?? 0} active in launcher</span>
+                </div>
+              </div>
+
+              <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-semibold text-cyan-400 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    Friends
+                  </h2>
+                  <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-md">
+                    {friends.length} online
+                  </span>
+                </div>
+                {friends.length > 0 ? (
+                  <div className="space-y-2">
+                    {friends.slice(0, 4).map((friend) => (
+                      <div
+                        key={friend.id}
+                        className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-all"
+                      >
+                        <div className="relative">
+                          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-cyan-300">
+                              {friend.username.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080a0f] ${
+                              friend.status === "playing"
+                                ? "bg-emerald-400"
+                                : friend.status === "online"
+                                ? "bg-green-400"
+                                : friend.status === "away"
+                                ? "bg-yellow-400"
+                                : "bg-gray-500"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-white truncate">
+                            {friend.username}
+                          </p>
+                          <p className="text-[10px] text-gray-500 truncate">
+                            {friend.status === "playing" && friend.location
+                              ? `Playing ${friend.location}`
+                              : friend.status}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-4 text-gray-500">
+                    <Users className="w-6 h-6 mb-1.5 opacity-30" />
+                    <span className="text-[11px]">No friends online</span>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          {commits.length > 0 && (
+            <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-cyan-400 mb-2 flex items-center gap-1.5">
+                <Newspaper className="w-3.5 h-3.5" />
+                Recent Commits
+              </h2>
+              <div className="space-y-2">
+                {commits.map((commit) => (
+                  <a
+                    key={commit.id}
+                    href={commit.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-2.5 p-2.5 rounded-lg bg-white/5 hover:bg-white/[0.07] transition-all border border-white/5"
+                  >
+                    <div className="w-9 h-9 rounded-md bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-cyan-300">{commit.id}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-xs text-white truncate">{commit.message}</h3>
+                      <p className="text-gray-400 text-[10px] mt-0.5">
+                        {commit.author} · {new Date(commit.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.main>
+    </div>
+  );
+}

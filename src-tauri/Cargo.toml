@@ -1,0 +1,42 @@
+[package]
+name = "splash-launcher"
+version = "22.30.0"
+description = "Splash Launcher - A Fortnite Private Server Launcher"
+authors = ["Splash Team"]
+license = "MIT"
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.2.0", features = ["protocol-asset"] }
+tauri-plugin-log = "2.0.0-rc"
+sysinfo = "0.29.10"
+tauri-plugin-shell = "2"
+tauri-plugin-deep-link = { git = "https://github.com/FabianLars/tauri-plugin-deep-link", branch = "main" }
+regex = "1"
+tauri-plugin-dialog = "2"
+sha2 = "0.9"
+tauri-plugin-notification = "2"
+reqwest = { version = "0.11.3", features = ["stream", "blocking", "json"] }
+winapi = { version = "0.3", features = ["tlhelp32", "shellapi", "winbase"] }
+declarative-discord-rich-presence = { git = "https://github.com/KPidS/declarative-discord-rich-presence" }
+tauri-plugin-process = "2"
+tokio = { version = "=1.32.0", features = ["full"] }
+futures = "0.3"
+windows = { version = "0.58", features = ["Win32_UI_Shell"] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"

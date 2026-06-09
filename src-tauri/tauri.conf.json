@@ -1,0 +1,54 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Splash Launcher",
+  "version": "22.30.0",
+  "identifier": "com.splash.launcher",
+  "build": {
+    "frontendDist": "../out",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Splash Launcher",
+        "width": 1280,
+        "height": 720,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "assetProtocol": {
+        "scope": ["*/**"],
+        "enable": true
+      },
+      "csp": null
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQwNjhCRDYzMTM4RTVDMDUKUldRRlhJNFRZNzFvMERaWHJMeURTNzJSMVo0TlRUZ21VeUorWGJMTndFL0xtTkZNTTFSdTRvOHQK",
+      "endpoints": [
+        "http://127.0.0.1:3551/launcher/updater"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "createUpdaterArtifacts": true
+  }
+}
