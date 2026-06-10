@@ -127,7 +127,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "splash-auth",
-      storage,
+      storage: storage as any,
       partialize: (state) => ({
         token: state.token,
         user: state.user,

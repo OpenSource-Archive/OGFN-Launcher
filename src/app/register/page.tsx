@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api/client";
 import { useSessionStore } from "@/lib/stores/session";
 import FlowParticles from "@/components/auth/flow-particles";
 import { listen } from "@tauri-apps/api/event";
+import { open } from "@tauri-apps/plugin-shell";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,6 +27,12 @@ export default function RegisterPage() {
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -72,14 +79,49 @@ export default function RegisterPage() {
   }, [router, session]);
 
   const startDiscordOAuth = async () => {
+    const state = `splash_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    setError("");
     try {
-      const res = await fetch(endpoints.GET_DISCORD_URI);
+      const res = await fetch(`${endpoints.GET_DISCORD_URI}?state=${state}`);
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
+      if (!data.url) {
         setError("Failed to get Discord OAuth URL.");
+        return;
       }
+      await open(data.url);
+
+      let attempts = 0;
+      const maxAttempts = 60;
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        if (attempts > maxAttempts) {
+          clearInterval(pollInterval);
+          setError("Discord authentication timed out.");
+          return;
+        }
+        try {
+          const pollRes = await fetch(
+            `${endpoints.GET_BASE_URL}/api/auth/discord/poll?state=${state}`
+          );
+          const pollData = await pollRes.json();
+          if (pollData.ready) {
+            clearInterval(pollInterval);
+            const user = pollData.user
+              ? {
+                  accountId: pollData.user.id || "",
+                  displayName: pollData.user.username || "",
+                  email: pollData.user.email || "",
+                  banned: false,
+                  profilePicture: pollData.user.avatar || "",
+                  discordId: "",
+                  roles: [],
+                }
+              : null;
+            session.setToken(pollData.token, user);
+            router.push("/home");
+          }
+        } catch {}
+      }, 2000);
     } catch {
       setError("Failed to start Discord OAuth.");
     }
@@ -330,6 +372,34 @@ export default function RegisterPage() {
           </form>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+            className="absolute inset-0 z-[100] bg-[#05070a] flex flex-col items-center justify-center pointer-events-none"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-5xl font-bold text-white tracking-tight"
+            >
+              Welcome
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-sm text-gray-500 mt-3"
+            >
+              Splash Launcher
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">

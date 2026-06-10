@@ -42,6 +42,12 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(t);
+  }, []);
 
   const startDiscordOAuth = async () => {
     const state = `splash_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -499,6 +505,34 @@ export default function LoginPage() {
           </form>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+            className="absolute inset-0 z-[100] bg-[#05070a] flex flex-col items-center justify-center pointer-events-none"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-5xl font-bold text-white tracking-tight"
+            >
+              Welcome
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-sm text-gray-500 mt-3"
+            >
+              Splash Launcher
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
