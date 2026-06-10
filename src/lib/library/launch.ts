@@ -11,11 +11,11 @@ export const launchBuild = async (selectedPath: string, version: string) => {
   const appWindow = getCurrentWebviewWindow();
   const buildstate = useBuildsStore.getState();
 
-  const token = localStorage.getItem("splash.auth.token");
+  const token = localStorage.getItem("classified.auth.token");
 
   if (!token) {
     sendNotification({
-      title: "Splash",
+      title: "Classified",
       body: "You are not authenticated!",
       sound: "ms-winsoundevent:Notification.Default",
     });
@@ -25,7 +25,7 @@ export const launchBuild = async (selectedPath: string, version: string) => {
   const exists = (await invoke("check_game_exists", { path: selectedPath }).catch(() => false)) as boolean;
   if (!exists) {
     sendNotification({
-      title: "Splash",
+      title: "Classified",
       body: "Game does not exist!",
       sound: "ms-winsoundevent:Notification.Default",
     });

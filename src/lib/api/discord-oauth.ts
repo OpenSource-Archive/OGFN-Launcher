@@ -9,7 +9,7 @@ export const generateAccountResponse = async (
   const issuer =
     TauriConfig.Version === "0.1.0"
       ? "dev 0.1.0"
-      : `Splash-Launcher / ${TauriConfig.Version}`;
+      : `Classified / ${TauriConfig.Version}`;
 
   const response:
     | AxiosResponse<AuthResponse>

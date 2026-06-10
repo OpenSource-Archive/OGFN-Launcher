@@ -148,6 +148,6 @@ export const handleAddBuild = async () => {
     buildState.add(selectedPath.toString(), data);
     return true;
   } catch {
-    sendNotification({ title: "Splash", body: "Error adding build!" });
+    sendNotification({ title: "Classified", body: "Error adding build!" });
   }
 };

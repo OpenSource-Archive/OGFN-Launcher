@@ -1,8 +1,8 @@
 [package]
-name = "splash-launcher"
+name = "classified-launcher"
 version = "22.30.0"
-description = "Splash Launcher - A Fortnite Private Server Launcher"
-authors = ["Splash Team"]
+description = "Classified - A Fortnite Private Server Launcher"
+authors = ["Classified Team"]
 license = "MIT"
 repository = ""
 edition = "2021"
@@ -15,31 +15,31 @@ name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.3", features = [] }
+tauri-build = { version = "2.6", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
-tauri = { version = "2.2.0", features = ["protocol-asset"] }
+tauri = { version = "2.11", features = ["protocol-asset"] }
 tauri-plugin-log = "2.0.0-rc"
 sysinfo = "0.29.10"
-tauri-plugin-shell = "2"
+tauri-plugin-shell = "2.3.5"
 tauri-plugin-deep-link = { git = "https://github.com/FabianLars/tauri-plugin-deep-link", branch = "main" }
 regex = "1"
-tauri-plugin-dialog = "2"
+tauri-plugin-dialog = "2.7.1"
 sha2 = "0.9"
-tauri-plugin-notification = "2"
+tauri-plugin-notification = "2.3.3"
 reqwest = { version = "0.11.3", features = ["stream", "blocking", "json"] }
 winapi = { version = "0.3", features = ["tlhelp32", "shellapi", "winbase"] }
 declarative-discord-rich-presence = { git = "https://github.com/KPidS/declarative-discord-rich-presence" }
-tauri-plugin-process = "2"
+tauri-plugin-process = "2.3.1"
 tokio = { version = "=1.32.0", features = ["full"] }
 futures = "0.3"
 windows = { version = "0.58", features = ["Win32_UI_Shell"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-updater = "2"
+tauri-plugin-updater = "2.10.1"
 
 [profile.release]
 opt-level = "z"

@@ -203,8 +203,8 @@ export default function LoginPage() {
             className="w-full mt-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-4 shadow-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-cyan-500/20 p-2 rounded-full">
-                <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
+              <div className="bg-yellow-500/20 p-2 rounded-full">
+                <Loader2 className="h-5 w-5 animate-spin text-yellow-400" />
               </div>
               <div>
                 <h3 className="text-sm font-medium text-white">
@@ -224,7 +224,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="w-full mt-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-4 shadow-lg"
+            className="w-full mt-6 rounded-lg bg-zinc-900/60 backdrop-blur-sm border border-white/10 p-4 shadow-lg"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="bg-yellow-500/20 p-2 rounded-full">
@@ -240,7 +240,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all"
+                  className="h-full bg-gradient-to-r from-yellow-500 to-amber-400 transition-all"
                   style={{ width: `${downloadProgress}%` }}
                 />
               </div>
@@ -302,20 +302,20 @@ export default function LoginPage() {
 
   if (updateStatus === "checking") {
     return (
-      <div className="flex min-h-screen relative select-none overflow-hidden bg-[#05070a] items-center justify-center">
+      <div className="flex min-h-screen relative select-none overflow-hidden bg-black items-center justify-center">
         <FlowParticles className="absolute inset-0" quantity={250} />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="relative z-10 w-80 p-8 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-lg flex flex-col items-center justify-center text-center"
+          className="relative z-10 w-80 p-8 rounded-xl bg-zinc-950/90 backdrop-blur-xl border border-white/10 shadow-lg flex flex-col items-center justify-center text-center"
         >
           <img
             src="/splashlogo.png"
-            alt="Splash Logo"
+            alt="Classified"
             className="h-20 w-auto object-contain drop-shadow-lg mb-6"
           />
-          <Loader2 className="h-8 w-8 animate-spin text-cyan-400 mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-yellow-400 mb-4" />
           <p className="text-white font-medium">Checking for updates...</p>
           <p className="text-xs text-gray-400 mt-2">
             Please wait while we verify the latest version
@@ -326,10 +326,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen relative select-none overflow-hidden bg-[#05070a]">
+    <div className="flex min-h-screen relative select-none overflow-hidden bg-black">
       <FlowParticles className="absolute inset-0" quantity={250} />
 
-      <div className="w-[460px] h-screen bg-black/80 backdrop-blur-xl border-r border-white/10 flex flex-col justify-start px-10 py-10 z-10">
+      <div className="w-[460px] h-screen bg-zinc-950/95 backdrop-blur-xl border-r border-white/10 flex flex-col justify-start px-10 py-10 z-10">
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -339,7 +339,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-6">
             <img
               src="/splashlogo.png"
-              alt="Splash Logo"
+              alt="Classified"
               className="h-20 w-auto object-contain drop-shadow-lg"
             />
           </div>
@@ -359,7 +359,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
-                className="w-full mt-1 px-4 py-3 bg-neutral-900/90 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition"
+                className="w-full mt-1 px-4 py-3 bg-zinc-900 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 focus:outline-none transition"
               />
             </div>
 
@@ -370,7 +370,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="w-full mt-1 px-4 py-3 bg-neutral-900/90 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition"
+                className="w-full mt-1 px-4 py-3 bg-zinc-900 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 focus:outline-none transition"
               />
               <button
                 type="button"
@@ -390,7 +390,7 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={remember}
                 onChange={() => setRemember(!remember)}
-                className="accent-cyan-500"
+                className="accent-yellow-500"
               />
               Remember Me
             </label>
@@ -406,7 +406,7 @@ export default function LoginPage() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
+              className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
             >
               {isLoading ? (
                 <>
@@ -433,7 +433,7 @@ export default function LoginPage() {
               disabled={!isReady || isConnected}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
+              className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
             >
               <AnimatePresence mode="wait">
                 {!isReady ? (
@@ -512,7 +512,7 @@ export default function LoginPage() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7 }}
-            className="absolute inset-0 z-[100] bg-[#05070a] flex flex-col items-center justify-center pointer-events-none"
+            className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center pointer-events-none"
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -528,7 +528,7 @@ export default function LoginPage() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-sm text-gray-500 mt-3"
             >
-              Splash Launcher
+              Classified
             </motion.p>
           </motion.div>
         )}
@@ -536,7 +536,7 @@ export default function LoginPage() {
 
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>

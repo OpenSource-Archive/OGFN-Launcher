@@ -1,18 +1,18 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Splash Launcher",
+  "productName": "Classified",
   "version": "22.30.0",
-  "identifier": "com.splash.launcher",
+  "identifier": "com.classified.launcher",
   "build": {
     "frontendDist": "../out",
-    "devUrl": "http://localhost:3002",
+    "devUrl": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
   "app": {
     "windows": [
       {
-        "title": "Splash Launcher",
+        "title": "Classified",
         "width": 1280,
         "height": 720,
         "resizable": false,

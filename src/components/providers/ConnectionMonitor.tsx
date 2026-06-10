@@ -11,7 +11,7 @@ import { endpoints } from "@/lib/api/splash-endpoints";
 
 const PING_INTERVAL = 15000;
 const FAIL_THRESHOLD = 2;
-const DISCORD_URL = "https://discord.gg/splash";
+const DISCORD_URL = "https://discord.gg/classified";
 
 export default function ConnectionMonitor() {
   const router = useRouter();
@@ -96,7 +96,7 @@ export default function ConnectionMonitor() {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Connection Lost</h2>
           <p className="text-gray-400 text-sm mb-6">
-            Lost connection to the Splash servers. Check your internet or the server may be down.
+            Lost connection to the Classified servers. Check your internet or the server may be down.
           </p>
           <div className="flex flex-col gap-2">
             <button onClick={handleRetry} disabled={retrying}

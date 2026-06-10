@@ -30,11 +30,11 @@ interface SessionActions {
 type SessionStore = SessionData & SessionActions;
 
 const STORAGE_CONFIG = {
-  token: { key: "splash.auth.token", defaultValue: "" },
-  athena: { key: "splash.auth.athena", defaultValue: "" },
-  user: { key: "splash.auth.user", defaultValue: "" },
-  hype: { key: "splash.auth.hype", defaultValue: "" },
-  common_core: { key: "splash.auth.common_core", defaultValue: "" },
+  token: { key: "classified.auth.token", defaultValue: "" },
+  athena: { key: "classified.auth.athena", defaultValue: "" },
+  user: { key: "classified.auth.user", defaultValue: "" },
+  hype: { key: "classified.auth.hype", defaultValue: "" },
+  common_core: { key: "classified.auth.common_core", defaultValue: "" },
 } as const;
 
 const storage = {
@@ -153,7 +153,7 @@ export const useSessionStore = create<SessionStore>()(
       },
     }),
     {
-      name: "splash-session",
+      name: "classified-session",
       partialize: (state) => ({
         token: state.token,
         user: state.user,

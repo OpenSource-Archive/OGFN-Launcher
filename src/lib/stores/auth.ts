@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: true,
           });
 
-          localStorage.setItem("splash.auth.token", token);
+          localStorage.setItem("classified.auth.token", token);
 
           await get().verify();
           return true;
@@ -67,8 +67,8 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        localStorage.removeItem("splash.auth.token");
-        localStorage.removeItem("splash.auth.user");
+        localStorage.removeItem("classified.auth.token");
+        localStorage.removeItem("classified.auth.user");
         set({
           token: null,
           user: null,
@@ -113,12 +113,8 @@ export const useAuthStore = create<AuthStore>()(
       },
     }),
     {
-      name: "splash-auth",
-<<<<<<< HEAD
-      storage: storage as any,
-=======
+      name: "classified-auth",
       storage: createJSONStorage(() => localStorage),
->>>>>>> 6feae503997c688b92f634f49d5eb352a43ce471
       partialize: (state) => ({
         token: state.token,
         user: state.user,

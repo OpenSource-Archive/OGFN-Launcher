@@ -13,28 +13,28 @@ body {
   }
 }
 
-/* Custom Scrollbar - Splash Theme */
+/* Custom Scrollbar - Classified Theme */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(8, 10, 15, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(34, 211, 238, 0.25);
+  background: rgba(202, 138, 4, 0.35);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(34, 211, 238, 0.45);
+  background: rgba(202, 138, 4, 0.6);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(34, 211, 238, 0.25) rgba(8, 10, 15, 0.5);
+  scrollbar-color: rgba(202, 138, 4, 0.35) rgba(0, 0, 0, 0.6);
 }

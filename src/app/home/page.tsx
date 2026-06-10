@@ -194,10 +194,10 @@ export default function HomePage() {
     };
   }, [user?.accountId]);
 
-  const heroNews = news[0] ?? { title: "Welcome to Splash", body: "A custom Fortnite private server experience built for the community.", image: "/news.png" };
+  const heroNews = news[0] ?? { title: "Welcome to Classified", body: "A custom Fortnite private server experience built for the community.", image: "/news.png" };
 
   return (
-    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar />
 
       <motion.main
@@ -207,8 +207,8 @@ export default function HomePage() {
         transition={{ duration: 0.25, ease: "easeOut" }}
       >
         {updateAvailable && !updateDismissed && (
-          <div className="flex items-center justify-between px-5 py-2.5 bg-cyan-500/10 border-b border-cyan-500/20 text-sm">
-            <div className="flex items-center gap-2 text-cyan-300">
+          <div className="flex items-center justify-between px-5 py-2.5 bg-yellow-500/10 border-b border-yellow-500/20 text-sm">
+            <div className="flex items-center gap-2 text-yellow-300">
               <Download className="w-4 h-4 shrink-0" />
               <span>Update available — <strong>v{updateVersion}</strong>. Restart to install.</span>
             </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
                   } catch { setUpdating(false); }
                 }}
                 disabled={updating}
-                className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white rounded text-xs font-medium transition-colors"
+                className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white rounded text-xs font-medium transition-colors"
               >
                 {updating ? "Installing…" : "Install Now"}
               </button>
@@ -239,15 +239,15 @@ export default function HomePage() {
               {(() => {
                 const h = new Date().getHours();
                 return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-              })()}, <span className="text-cyan-400">{user?.displayName || user?.username || "Player"}</span>!
+              })()}, <span className="text-yellow-400">{user?.displayName || user?.username || "Player"}</span>!
             </h1>
             <p className="text-sm text-gray-400 mt-0.5">{status.activeLauncherUsers ?? 0} Players Online</p>
           </div>
 
-          <div className="rounded-xl bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg p-3 w-60">
+          <div className="rounded-xl bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg p-3 w-60">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-cyan-400 to-emerald-400 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-yellow-500 to-amber-400 flex items-center justify-center">
                   {(user as any)?.avatar ? (
                     <img src={(user as any).avatar} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -269,7 +269,7 @@ export default function HomePage() {
         </div>
 
         <div className="px-6 pb-6 space-y-3">
-          <div className="relative h-[200px] overflow-hidden rounded-xl shadow-lg group cursor-pointer" onClick={() => router.push("/library")}>
+          <div className="relative h-[200px] overflow-hidden rounded-xl shadow-lg group cursor-pointer border border-white/5" onClick={() => router.push("/library")}>
               <div className="absolute inset-0">
                 <img
                   src={heroNews.image}
@@ -289,7 +289,7 @@ export default function HomePage() {
                     e.stopPropagation();
                     router.push("/library");
                   }}
-                  className="w-12 h-12 bg-cyan-500 hover:bg-cyan-400 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/30 transition-all hover:scale-110"
+                  className="w-12 h-12 bg-yellow-500 hover:bg-yellow-400 rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/30 transition-all hover:scale-110"
                 >
                   <Play className="w-5 h-5 text-black fill-black ml-0.5" />
                 </button>
@@ -305,8 +305,8 @@ export default function HomePage() {
               </div>
           </div>
           <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex-1 bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-1.5">
+            <div className="flex-1 bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+              <h2 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
                 Launcher Updates
               </h2>
@@ -336,8 +336,8 @@ export default function HomePage() {
               )}
             </div>
             <div className="w-full lg:w-[280px] space-y-3">
-              <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
-                <h2 className="text-sm font-semibold text-cyan-400 mb-2">Status</h2>
+              <div className="bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+                <h2 className="text-sm font-semibold text-yellow-400 mb-2">Status</h2>
                 <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
                   <div className="flex items-center gap-2 mb-2">
                     <span
@@ -357,14 +357,14 @@ export default function HomePage() {
                   <p className="text-[10px] text-gray-500 mt-0.5">players in-game</p>
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
-                  <Users className="w-3 h-3 text-cyan-400" />
+                  <Users className="w-3 h-3 text-yellow-400" />
                   <span>{status.activeLauncherUsers ?? 0} active in launcher</span>
                 </div>
               </div>
 
-              <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+              <div className="bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-cyan-400 flex items-center gap-1.5">
+                  <h2 className="text-sm font-semibold text-yellow-400 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" />
                     Friends
                   </h2>
@@ -380,8 +380,8 @@ export default function HomePage() {
                         className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-all"
                       >
                         <div className="relative">
-                          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 flex items-center justify-center">
-                            <span className="text-[10px] font-bold text-cyan-300">
+                          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-yellow-400/20 to-amber-400/20 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-yellow-300">
                               {friend.username.charAt(0).toUpperCase()}
                             </span>
                           </div>
