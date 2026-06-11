@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar />
       <motion.main
         className="flex-1 flex flex-col overflow-y-auto"
@@ -84,15 +84,15 @@ export default function LeaderboardPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-[#080a0f]/80 backdrop-blur-sm border border-white/10 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-md bg-cyan-500/20 flex items-center justify-center">
-                  <Star className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="w-7 h-7 rounded-md bg-yellow-400/20 flex items-center justify-center">
+                  <Star className="w-3.5 h-3.5 text-yellow-300" />
                 </div>
                 <span className="text-[11px] text-gray-400 uppercase tracking-wider">Level</span>
               </div>
               <p className="text-2xl font-bold text-white">{stats.level}</p>
               <div className="mt-1.5 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-cyan-500 rounded-full"
+                  className="h-full bg-yellow-300 rounded-full"
                   style={{ width: `${Math.min((stats.xp % 10000) / 10000 * 100, 100)}%` }}
                 />
               </div>
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
                     onClick={() => setActiveTab(tab)}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                       activeTab === tab
-                        ? "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/30"
+                        ? "bg-yellow-400/20 text-yellow-200 ring-1 ring-yellow-400/30"
                         : "text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
@@ -163,18 +163,18 @@ export default function LeaderboardPage() {
                     key={entry.accountId}
                     className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
                       entry.username === user?.username
-                        ? "bg-cyan-500/10 border-cyan-500/20"
+                        ? "bg-yellow-400/10 border-yellow-400/20"
                         : "bg-white/[0.03] border-white/5"
                     }`}
                   >
                     <div className="w-6 flex items-center justify-center shrink-0">
                       {rankIcon(entry.rank)}
                     </div>
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-yellow-400/30 to-amber-400/30 flex items-center justify-center shrink-0">
                       {(entry as any).avatar ? (
                         <img src={(entry as any).avatar} alt={entry.username} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-[10px] font-bold text-cyan-300">
+                        <span className="text-[10px] font-bold text-yellow-200">
                           {entry.username.charAt(0).toUpperCase()}
                         </span>
                       )}

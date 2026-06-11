@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,7 +12,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-
 } from "lucide-react";
 import { endpoints } from "@/lib/api/splash-endpoints";
 import { useSessionStore } from "@/lib/stores/session";
@@ -21,6 +20,7 @@ import FlowParticles from "@/components/auth/flow-particles";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { open } from "@tauri-apps/plugin-shell";
+import { listen } from "@tauri-apps/api/event";
 import { apiClient } from "@/lib/api/client";
 
 export default function LoginPage() {
@@ -33,7 +33,7 @@ export default function LoginPage() {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [updateDetails, setUpdateDetails] = useState({
     version: "1.0.0",
-    notes: "Splash Launcher v1.0.0 - Initial Release",
+    notes: "Classified v1.0.0 - Initial Release",
   });
 
   const [username, setUsername] = useState("");
@@ -43,6 +43,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showSplash, setShowSplash] = useState(true);
+  const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
+  const [welcomeUser, setWelcomeUser] = useState<string>("");
+  const welcomeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lobbyAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 2500);
@@ -56,9 +60,14 @@ export default function LoginPage() {
 
     try {
       const res = await fetch(`${endpoints.GET_DISCORD_URI}?state=${state}`);
+      if (!res.ok) {
+        setError(`Backend returned ${res.status}. Is the server running?`);
+        setIsConnected(false);
+        return;
+      }
       const data = await res.json();
       if (!data.url) {
-        setError("Failed to get Discord OAuth URL.");
+        setError("Failed to get Discord OAuth URL from backend.");
         setIsConnected(false);
         return;
       }
@@ -98,18 +107,107 @@ export default function LoginPage() {
               : null;
 
             session.setToken(pollData.token, user);
+            setWelcomeMessage("Welcome Back");
+            setWelcomeUser(user?.displayName || user?.accountId || "Agent");
+            welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+            welcomeAudioRef.current.volume = 0.5;
+            welcomeAudioRef.current.play().catch(() => {});
+            lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+            lobbyAudioRef.current.loop = true;
+            lobbyAudioRef.current.currentTime = 35;
+            lobbyAudioRef.current.volume = 0;
+            lobbyAudioRef.current.play().catch(() => {});
+            let fadeVol = 0;
+            const fadeInterval = setInterval(() => {
+              fadeVol += 0.005;
+              if (fadeVol >= 0.15) {
+                fadeVol = 0.15;
+                clearInterval(fadeInterval);
+              }
+              if (lobbyAudioRef.current) lobbyAudioRef.current.volume = fadeVol;
+            }, 100);
             setTimeout(() => {
+              if (welcomeAudioRef.current) welcomeAudioRef.current.pause();
+              if (lobbyAudioRef.current) lobbyAudioRef.current.pause();
               window.location.href = "/home";
-            }, 500);
+            }, 5000);
           }
         } catch {
         }
       }, 2000);
-    } catch {
-      setError("Failed to start Discord OAuth.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to start Discord OAuth. Check backend connection.");
       setIsConnected(false);
     }
   };
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    const setupDeepLink = async () => {
+      unlisten = await listen<string>("deep-link", async (event) => {
+        const url = event.payload;
+        const urlObj = new URL(url.replace("splash://", "http://localhost/"));
+        const code = urlObj.searchParams.get("code");
+
+        if (!code) return;
+
+        try {
+          const response = await apiClient.get("/api/auth/discord/callback", {
+            params: { code },
+          });
+          const data = response.data;
+
+          const user = data.user
+            ? {
+                accountId: data.user.id || "",
+                displayName: data.user.username || "",
+                email: data.user.email || "",
+                banned: false,
+                profilePicture: data.user.avatar || "",
+                discordId: "",
+                roles: [],
+              }
+            : null;
+
+          session.setToken(data.token, user);
+          setWelcomeMessage("Welcome Back");
+          setWelcomeUser(user?.displayName || user?.accountId || "Agent");
+          welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+          welcomeAudioRef.current.volume = 0.5;
+          welcomeAudioRef.current.play().catch(() => {});
+          lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+          lobbyAudioRef.current.loop = true;
+          lobbyAudioRef.current.currentTime = 35;
+          lobbyAudioRef.current.volume = 0;
+          lobbyAudioRef.current.play().catch(() => {});
+          let fadeVol = 0;
+          const fadeInterval = setInterval(() => {
+            fadeVol += 0.005;
+            if (fadeVol >= 0.15) {
+              fadeVol = 0.15;
+              clearInterval(fadeInterval);
+            }
+            if (lobbyAudioRef.current) lobbyAudioRef.current.volume = fadeVol;
+          }, 100);
+          setTimeout(() => {
+            if (welcomeAudioRef.current) welcomeAudioRef.current.pause();
+            if (lobbyAudioRef.current) lobbyAudioRef.current.pause();
+            window.location.href = "/home";
+          }, 5000);
+        } catch {
+          setError("Discord authentication failed.");
+          setIsConnected(false);
+        }
+      });
+    };
+
+    setupDeepLink();
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [session]);
 
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
@@ -183,9 +281,31 @@ export default function LoginPage() {
 
     if (success) {
       setIsConnected(true);
+      setWelcomeMessage("Welcome Back");
+      const currentUser = session.user || legacyAuth.user;
+      setWelcomeUser(currentUser?.displayName || currentUser?.accountId || "Agent");
+      welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+      welcomeAudioRef.current.volume = 0.5;
+      welcomeAudioRef.current.play().catch(() => {});
+      lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+      lobbyAudioRef.current.loop = true;
+      lobbyAudioRef.current.currentTime = 35;
+      lobbyAudioRef.current.volume = 0;
+      lobbyAudioRef.current.play().catch(() => {});
+      let fadeVol = 0;
+      const fadeInterval = setInterval(() => {
+        fadeVol += 0.005;
+        if (fadeVol >= 0.15) {
+          fadeVol = 0.15;
+          clearInterval(fadeInterval);
+        }
+        if (lobbyAudioRef.current) lobbyAudioRef.current.volume = fadeVol;
+      }, 100);
       setTimeout(() => {
+        if (welcomeAudioRef.current) welcomeAudioRef.current.pause();
+        if (lobbyAudioRef.current) lobbyAudioRef.current.pause();
         window.location.href = "/home";
-      }, 1000);
+      }, 5000);
     } else {
       setError("Invalid username or password");
     }
@@ -203,8 +323,8 @@ export default function LoginPage() {
             className="w-full mt-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-4 shadow-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="bg-yellow-500/20 p-2 rounded-full">
-                <Loader2 className="h-5 w-5 animate-spin text-yellow-400" />
+              <div className="bg-yellow-400/20 p-2 rounded-full">
+                <Loader2 className="h-5 w-5 animate-spin text-yellow-200" />
               </div>
               <div>
                 <h3 className="text-sm font-medium text-white">
@@ -227,8 +347,8 @@ export default function LoginPage() {
             className="w-full mt-6 rounded-lg bg-zinc-900/60 backdrop-blur-sm border border-white/10 p-4 shadow-lg"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="bg-yellow-500/20 p-2 rounded-full">
-                <Download className="h-5 w-5 text-yellow-400" />
+              <div className="bg-yellow-400/20 p-2 rounded-full">
+                <Download className="h-5 w-5 text-yellow-200" />
               </div>
               <div>
                 <h3 className="text-sm font-medium text-white">
@@ -240,7 +360,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-yellow-500 to-amber-400 transition-all"
+                  className="h-full bg-gradient-to-r from-yellow-300 to-amber-200 transition-all"
                   style={{ width: `${downloadProgress}%` }}
                 />
               </div>
@@ -311,11 +431,11 @@ export default function LoginPage() {
           className="relative z-10 w-80 p-8 rounded-xl bg-zinc-950/90 backdrop-blur-xl border border-white/10 shadow-lg flex flex-col items-center justify-center text-center"
         >
           <img
-            src="/splashlogo.png"
+            src="/Classified.png"
             alt="Classified"
             className="h-20 w-auto object-contain drop-shadow-lg mb-6"
           />
-          <Loader2 className="h-8 w-8 animate-spin text-yellow-400 mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-yellow-200 mb-4" />
           <p className="text-white font-medium">Checking for updates...</p>
           <p className="text-xs text-gray-400 mt-2">
             Please wait while we verify the latest version
@@ -338,65 +458,58 @@ export default function LoginPage() {
         >
           <div className="flex justify-center mb-6">
             <img
-              src="/splashlogo.png"
+              src="/Classified.png"
               alt="Classified"
               className="h-20 w-auto object-contain drop-shadow-lg"
             />
           </div>
 
-          <h1 className="text-3xl font-bold mb-6 text-white text-center">
+          <h1 className="text-2xl font-bold mb-4 text-white text-center">
             Sign In
           </h1>
 
-          <form
-            onSubmit={handlePasswordSubmit}
-            className="flex flex-col gap-5 flex-1"
-          >
+          <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3 flex-1">
             <div className="flex flex-col">
-              <label className="text-sm text-gray-300">Username</label>
+              <label className="text-xs text-gray-400 font-medium">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username"
-                className="w-full mt-1 px-4 py-3 bg-zinc-900 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 focus:outline-none transition"
+                className="w-full px-3.5 py-2.5 bg-zinc-900 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-300/50 focus:outline-none transition"
               />
             </div>
 
             <div className="flex flex-col relative">
-              <label className="text-sm text-gray-300">Password</label>
+              <label className="text-xs text-gray-400 font-medium">Password</label>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="w-full mt-1 px-4 py-3 bg-zinc-900 border border-white/10 rounded-lg text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-500/50 focus:outline-none transition"
+                className="w-full px-3.5 py-2.5 bg-zinc-900 border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:ring-2 focus:ring-yellow-300/50 focus:outline-none transition"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 w-6 h-6 flex items-center justify-center text-gray-300 cursor-pointer"
+                className="absolute right-3 top-[1.85rem] w-6 h-6 flex items-center justify-center text-gray-300 cursor-pointer"
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
 
-            <label className="flex items-center text-gray-300 text-sm gap-2 cursor-pointer select-none">
+            <label className="flex items-center text-gray-400 text-xs gap-1.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={() => setRemember(!remember)}
-                className="accent-yellow-500"
+                className="accent-yellow-300 w-3.5 h-3.5"
               />
               Remember Me
             </label>
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-500/10 border border-red-400/30 rounded-lg p-2">
+              <p className="text-xs text-red-400 bg-red-500/10 border border-red-400/30 rounded-lg px-2 py-1.5">
                 {error}
               </p>
             )}
@@ -406,7 +519,7 @@ export default function LoginPage() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
+              className="w-full py-3 bg-yellow-400 hover:bg-yellow-300 border border-yellow-400/50 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition shadow-md shadow-yellow-400/15"
             >
               {isLoading ? (
                 <>
@@ -421,10 +534,10 @@ export default function LoginPage() {
               )}
             </motion.button>
 
-            <div className="flex items-center gap-3 my-2">
-              <div className="flex-1 h-px bg-gray-600" />
-              <span className="text-xs text-gray-500">or</span>
-              <div className="flex-1 h-px bg-gray-600" />
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-px bg-gray-700" />
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-gray-700" />
             </div>
 
             <motion.button
@@ -433,49 +546,22 @@ export default function LoginPage() {
               disabled={!isReady || isConnected}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-yellow-600 hover:bg-yellow-500 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition"
+              className="w-full py-3 bg-yellow-400 hover:bg-yellow-300 border border-yellow-400/50 rounded-lg font-semibold text-white flex justify-center items-center gap-2 disabled:opacity-50 transition shadow-md shadow-yellow-400/15"
             >
               <AnimatePresence mode="wait">
                 {!isReady ? (
-                  <motion.div
-                    key="verifying"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center"
-                  >
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <motion.div key="verifying" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
                     Verifying
                   </motion.div>
                 ) : isConnected ? (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-center"
-                  >
+                  <motion.div key="success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
                     Connected
-                    <CheckCircle className="ml-2 h-5 w-5" />
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="connect"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-center"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="mr-2"
-                    >
+                  <motion.div key="connect" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                       <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
                     </svg>
                     Sign in with Discord
@@ -484,18 +570,11 @@ export default function LoginPage() {
               </AnimatePresence>
             </motion.button>
 
-            <div className="flex justify-between text-sm mt-2 text-gray-300">
-              <button
-                type="button"
-                className="underline text-gray-500 cursor-not-allowed transition"
-                disabled
-              >
-                Check Out The Server?
-              </button>
+            <div className="flex justify-center text-sm mt-2">
               <button
                 type="button"
                 onClick={() => router.push("/register")}
-                className="underline hover:text-white transition"
+                className="underline hover:text-white transition text-gray-400"
               >
                 Create Account
               </button>
@@ -514,6 +593,14 @@ export default function LoginPage() {
             transition={{ duration: 0.7 }}
             className="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center pointer-events-none"
           >
+            <motion.img
+              src="/Classified.png"
+              alt="Classified"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="h-16 w-auto object-contain drop-shadow-lg mb-4"
+            />
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -534,9 +621,46 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {welcomeMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="absolute inset-0 z-[90] bg-black/95 flex flex-col items-center justify-center pointer-events-none"
+          >
+            <motion.img
+              src="/Classified.png"
+              alt="Classified"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+              className="h-14 w-auto object-contain drop-shadow-lg mb-5"
+            />
+            <motion.h1
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="text-5xl font-bold text-white tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+            >
+              {welcomeMessage}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+              className="text-base text-gray-400 mt-4 tracking-wide"
+            >
+              Agent {welcomeUser}, you come highly recommended.
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-16 h-16 border-4 border-yellow-300 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>

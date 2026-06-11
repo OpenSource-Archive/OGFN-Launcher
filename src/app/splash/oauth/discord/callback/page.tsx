@@ -65,14 +65,14 @@ export default function DiscordCallbackPage() {
         transition={{ duration: 0.4 }}
       >
         <img
-          src="/splashlogo.png"
-          alt="Splash Logo"
+          src="/Classified.png"
+          alt="Classified"
           className="h-16 w-auto object-contain mb-6"
         />
 
         {status === "loading" && (
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-yellow-300" />
             <p className="text-white font-medium">Authenticating...</p>
           </div>
         )}

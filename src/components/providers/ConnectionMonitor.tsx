@@ -100,7 +100,7 @@ export default function ConnectionMonitor() {
           </p>
           <div className="flex flex-col gap-2">
             <button onClick={handleRetry} disabled={retrying}
-              className="w-full px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+              className="w-full px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2">
               <RefreshCw className={`w-4 h-4 ${retrying ? "animate-spin" : ""}`} />
               {retrying ? "Retrying…" : "Try Again"}
             </button>

@@ -31,7 +31,7 @@ use std::ffi::{ CString };
 use windows::core::PCSTR;
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
-const BACKEND_URL: &str = env!("BACKEND_URL", "https://overpower-irritate-dealt.ngrok-free.dev");
+const BACKEND_URL: &str = "https://overpower-irritate-dealt.ngrok-free.dev";
 
 #[tauri::command]
 fn rich_presence(username: String, page: String) {
@@ -147,7 +147,7 @@ fn experience(
     exchange_code: String,
     is_dev: bool,
     eor: bool,
-    version: String
+    version: String,
 ) -> Result<bool, String> {
     exit();
     std::thread::sleep(std::time::Duration::from_secs(2));
@@ -310,7 +310,7 @@ fn experience(
     Ok(true)
 }
 
-const BASE_URL: &str = env!("BACKEND_URL", "https://overpower-irritate-dealt.ngrok-free.dev");
+const BASE_URL: &str = "https://overpower-irritate-dealt.ngrok-free.dev";
 
 #[derive(Debug, Deserialize, Clone)]
 struct ManifestFile {

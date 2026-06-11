@@ -91,7 +91,7 @@ export default function ShopPage() {
   const isEmpty = shop.featured.length === 0 && shop.daily.length === 0;
 
   return (
-    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar />
       <motion.main
         className="flex-1 flex flex-col overflow-y-auto"
@@ -101,7 +101,7 @@ export default function ShopPage() {
       >
         <div className="px-6 pt-5 pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-cyan-400" />
+            <ShoppingBag className="w-5 h-5 text-yellow-300" />
             <h1 className="text-2xl font-bold text-white">Item Shop</h1>
           </div>
           <button
@@ -115,12 +115,17 @@ export default function ShopPage() {
 
         <div className="px-6 pb-6 space-y-6">
           {loading ? (
-            <div className="flex items-center justify-center h-80">
-              <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+            <div className="flex flex-col items-center justify-center h-80 gap-4">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                <div className="absolute inset-0 rounded-full border-2 border-t-yellow-300 border-r-yellow-300/50 border-b-transparent border-l-transparent animate-spin" />
+                <div className="absolute inset-2 rounded-full border border-t-yellow-200/30 border-transparent animate-spin" style={{ animationDuration: "1.5s", animationDirection: "reverse" }} />
+              </div>
+              <p className="text-xs text-gray-500 tracking-widest uppercase">Loading</p>
             </div>
           ) : isEmpty ? (
             <div className="flex flex-col items-center justify-center h-64 bg-[#080a0f]/80 border border-white/10 rounded-xl">
-              <ShoppingBag className="w-10 h-10 text-cyan-400 mb-3" />
+              <ShoppingBag className="w-10 h-10 text-yellow-300/60 mb-3" />
               <p className="text-sm font-semibold text-white mb-1">No Items Available</p>
               <p className="text-xs text-gray-500">Check back later for new items.</p>
             </div>
@@ -128,7 +133,7 @@ export default function ShopPage() {
             <>
               {shop.featured.length > 0 && (
                 <section>
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-cyan-400 mb-3">Featured</h2>
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-yellow-300/80 mb-3">Featured</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
                     {shop.featured.map(item => <ItemCard key={item.id} item={item} />)}
                   </div>
@@ -136,7 +141,7 @@ export default function ShopPage() {
               )}
               {shop.daily.length > 0 && (
                 <section>
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-cyan-400 mb-3">Daily</h2>
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-yellow-300/80 mb-3">Daily</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3">
                     {shop.daily.map(item => <ItemCard key={item.id} item={item} />)}
                   </div>

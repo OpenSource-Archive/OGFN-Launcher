@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, Info, LogOut, Pencil, X, Loader2 } from "lucide-react";
+import { User, Info, LogOut, Pencil, X, Loader2, Music, Volume2, VolumeX } from "lucide-react";
+import useMusicStore from "@/lib/stores/music";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useSessionStore } from "@/lib/stores/session";
 import { apiClient } from "@/lib/api/client";
@@ -22,6 +23,8 @@ export default function SettingsPage() {
   const [eor, setEor] = useState(false);
   const [ror, setRor] = useState(false);
   const [bubbleBuilds, setBubbleBuilds] = useState(false);
+
+  const { isMuted, volume, toggleMute, setVolume } = useMusicStore();
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -55,23 +58,23 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar />
 
       <main className="flex-1 p-8 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
         <div className="max-w-2xl space-y-6">
-          <section className="bg-[#080a0f] border border-white/5 rounded-xl p-6">
+          <section className="bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-cyan-400" />
+              <User className="w-5 h-5 text-yellow-300" />
               <h2 className="text-lg font-semibold">Account</h2>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative group cursor-pointer" onClick={() => setShowAvatarModal(true)}>
-                  <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-cyan-400 to-emerald-400 flex items-center justify-center ring-2 ring-white/10">
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-2 ring-yellow-300/20">
                     {currentAvatar ? (
                       <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -89,7 +92,7 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-400">{user?.accountId}</p>
                   <button
                     onClick={() => setShowAvatarModal(true)}
-                    className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors mt-0.5"
+                    className="text-xs text-yellow-300 hover:text-yellow-200 transition-colors mt-0.5"
                   >
                     Change avatar
                   </button>
@@ -105,9 +108,9 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="bg-[#080a0f] border border-white/5 rounded-xl p-6">
+          <section className="bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Info className="w-5 h-5 text-cyan-400" />
+              <Info className="w-5 h-5 text-yellow-300" />
               <h2 className="text-lg font-semibold">About</h2>
             </div>
             <div className="space-y-2">
@@ -122,7 +125,53 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="bg-[#080a0f] border border-white/5 rounded-xl p-6">
+          <section className="bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Music className="w-5 h-5 text-yellow-300" />
+              <h2 className="text-lg font-semibold">Music</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300">Background Music</span>
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
+                    !isMuted ? "bg-yellow-400" : "bg-gray-600"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      !isMuted ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={toggleMute}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  className="flex-1 h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-yellow-400"
+                />
+                <span className="text-xs text-gray-400 w-8 text-right">
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-lg font-semibold">Build Settings</h2>
             </div>
@@ -138,7 +187,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => set(!state)}
                     className={`relative w-9 h-5 rounded-full transition-colors duration-200 ${
-                      state ? "bg-cyan-500" : "bg-gray-600"
+                      state ? "bg-yellow-400" : "bg-gray-600"
                     }`}
                   >
                     <span
@@ -155,7 +204,7 @@ export default function SettingsPage() {
 
         {showAvatarModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-[#080a0f] border border-white/10 rounded-xl p-6 w-full max-w-sm mx-4">
+            <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold">Change Avatar</h3>
                 <button onClick={() => { setShowAvatarModal(false); setAvatarError(""); setAvatarInput(""); setAvatarPreview(""); }} className="text-gray-400 hover:text-white transition-colors">
@@ -165,7 +214,7 @@ export default function SettingsPage() {
 
               {avatarPreview && (
                 <div className="flex justify-center mb-4">
-                  <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-cyan-500/40">
+                  <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-yellow-400/30">
                     <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" onError={() => setAvatarPreview("")} />
                   </div>
                 </div>
@@ -179,7 +228,7 @@ export default function SettingsPage() {
                 value={avatarInput}
                 onChange={(e) => { setAvatarInput(e.target.value); setAvatarPreview(e.target.value); setAvatarError(""); }}
                 placeholder="https://example.com/avatar.png"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500/50 mb-1"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-yellow-300/50 mb-1"
               />
 
               {avatarError && <p className="text-xs text-red-400 mb-3">{avatarError}</p>}
@@ -191,7 +240,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleAvatarSave}
                   disabled={avatarSaving || !avatarInput.trim()}
-                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black rounded-lg text-sm transition-colors flex items-center gap-2"
                 >
                   {avatarSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Save
@@ -203,7 +252,7 @@ export default function SettingsPage() {
 
         {showLogoutConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-[#080a0f] border border-white/10 rounded-xl p-6 max-w-sm w-full mx-4">
+            <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
               <h3 className="text-lg font-semibold mb-2">Logout?</h3>
               <p className="text-gray-400 text-sm mb-4">
                 You will be returned to the login screen.

@@ -4,6 +4,7 @@ import "./globals.css";
 import WindowBar from "@/components/layout/WindowBar";
 import RpcProvider from "@/components/providers/RpcProvider";
 import ConnectionMonitor from "@/components/providers/ConnectionMonitor";
+import MusicProvider from "@/components/providers/MusicProvider";
 
 const font = Rubik({
   weight: ["400", "500", "600", "700"],
@@ -11,8 +12,8 @@ const font = Rubik({
 });
 
 export const metadata: Metadata = {
-  title: "Splash Launcher",
-  description: "Splash - A Fortnite Private Server Launcher",
+  title: "Classified",
+  description: "Classified - A Fortnite Private Server Launcher",
 };
 
 export default function RootLayout({
@@ -28,6 +29,7 @@ export default function RootLayout({
         <WindowBar />
         <RpcProvider />
         <ConnectionMonitor />
+        <MusicProvider />
         {children}
       </body>
     </html>

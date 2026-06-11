@@ -21,6 +21,7 @@ interface BuildsState {
   ResetOnRelease: boolean;
   FileCheck: boolean;
   BubbleBuilds: boolean;
+  eventPlaylist: string | null;
   setDownloadPath: (path: string) => void;
   add: (path: string, build: IBuild) => void;
   remove: (path: string) => void;
@@ -30,6 +31,7 @@ interface BuildsState {
   setResetOnRelease: (enabled: boolean) => void;
   setFileCheck: (enabled: boolean) => void;
   setBubbleBuilds: (enabled: boolean) => void;
+  setEventPlaylist: (playlist: string | null) => void;
 }
 
 const useBuildsStore = create<BuildsState>((set, get) => ({
@@ -45,6 +47,8 @@ const useBuildsStore = create<BuildsState>((set, get) => ({
     typeof window !== "undefined" ? localStorage.getItem("ResetOnRelease") === "true" : false,
   BubbleBuilds:
     typeof window !== "undefined" ? localStorage.getItem("BubbleBuilds") === "true" : false,
+  eventPlaylist:
+    typeof window !== "undefined" ? localStorage.getItem("event_playlist") || null : null,
   FileCheck: typeof window !== "undefined" ? localStorage.getItem("file_check") === "true" : false,
   EorEnabled:
     typeof window !== "undefined" ? localStorage.getItem("Eor_enabled") === "true" : false,
@@ -101,6 +105,17 @@ const useBuildsStore = create<BuildsState>((set, get) => ({
     if (typeof window === "undefined") return;
     localStorage.setItem("BubbleBuilds", enabled.toString());
     set({ BubbleBuilds: enabled });
+  },
+
+  setEventPlaylist: (playlist) => {
+    if (typeof window === "undefined") return;
+    if (playlist === null || playlist === "") {
+      localStorage.removeItem("event_playlist");
+      set({ eventPlaylist: null });
+    } else {
+      localStorage.setItem("event_playlist", playlist);
+      set({ eventPlaylist: playlist });
+    }
   },
 
   setResetOnRelease: (enabled) => {

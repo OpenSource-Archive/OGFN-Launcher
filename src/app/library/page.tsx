@@ -77,330 +77,323 @@ export default function LibraryPage() {
 
   const builds = mounted ? (Array.from(buildState?.builds?.values() || []) as IBuild[]) : [];
 
+  if (!mounted) {
+    return (
+      <div className="flex h-screen bg-black text-white overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+              <div className="absolute inset-0 rounded-full border-2 border-t-yellow-300 border-r-yellow-300/50 border-b-transparent border-l-transparent animate-spin" />
+              <div className="absolute inset-2 rounded-full border border-t-yellow-200/30 border-transparent animate-spin" style={{ animationDuration: "1.5s", animationDirection: "reverse" }} />
+            </div>
+            <p className="text-xs text-gray-500 tracking-widest uppercase">Loading</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-screen bg-[#05070a] text-white overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden">
       <Sidebar />
       <motion.main
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="flex-1 p-8 overflow-y-auto"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="flex-1 overflow-y-auto"
       >
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mt-3">Library</h1>
+        <div className="px-7 pt-6 pb-7 max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-white">Library</h1>
+              <p className="text-xs text-gray-500 mt-0.5">{builds.length} build{builds.length !== 1 ? "s" : ""} installed</p>
+            </div>
+            <button
+              onClick={() => handleAdd()}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-yellow-400/20"
+            >
+              {isLoading ? (
+                <>
+                  <div className="relative w-4 h-4">
+                    <div className="absolute inset-0 rounded-full border-2 border-black/20" />
+                    <div className="absolute inset-0 rounded-full border-2 border-t-black border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+                  </div>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Add Build
+                </>
+              )}
+            </button>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-6">
-            {builds.map((build, index) => {
-              if (!build) return null;
-              const versionNumber = Number(build.version);
-              let isActive = activeBuild === build.path;
+          {builds.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]">
+              <div className="w-12 h-12 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mb-3">
+                <Plus className="w-6 h-6 text-yellow-300/60" />
+              </div>
+              <p className="text-sm text-gray-400 font-medium">No builds yet</p>
+              <p className="text-xs text-gray-600 mt-1">Click "Add Build" to get started</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {builds.map((build, index) => {
+                if (!build) return null;
+                const versionNumber = Number(build.version);
+                const isActive = activeBuild === build.path;
+                const chapter = versionNumber <= 10.4 ? "Chapter 1" : versionNumber <= 18.4 ? "Chapter 2" : "Chapter 3";
 
-              return (
-                <div
-                  key={index}
-                  className={`bg-[#080a0f]/80 rounded-lg overflow-hidden shadow-lg transition-all duration-300 ${
-                    isActive ? "ring-2 ring-cyan-500/40" : "hover:shadow-3xl"
-                  }`}
-                  onMouseEnter={() => setHoveredBuild(build.path)}
-                  onMouseLeave={() => setHoveredBuild(null)}
-                >
-                  <div
-                    className="w-full h-full text-left cursor-pointer"
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`group relative bg-zinc-900/50 border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+                      isActive
+                        ? "border-yellow-400/40 shadow-lg shadow-yellow-400/10"
+                        : "border-white/[0.06] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40"
+                    } ${activeBuild !== null && !isActive ? "opacity-40 pointer-events-none" : ""}`}
+                    onMouseEnter={() => setHoveredBuild(build.path)}
+                    onMouseLeave={() => setHoveredBuild(null)}
                     onClick={() => {
                       if (activeBuild === null || isActive) handlelaunchBuild(build.path, build.version);
                     }}
-                    style={{ opacity: activeBuild !== null && !isActive ? 0.5 : 1, pointerEvents: activeBuild !== null && !isActive ? "none" : "auto" }}
                   >
-                    <div className="relative">
+                    <div className="relative h-40 overflow-hidden">
                       <img
                         src={build.splash || "/placeholder.svg"}
-                        alt={`Splash: ${build.version}`}
-                        className="w-full h-40 object-cover object-top"
+                        alt={`v${build.version}`}
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                         width={240}
                         height={160}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
                       {isActive && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                          <HiPause className="h-16 w-16 text-gray-400/90" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+                          <div className="flex flex-col items-center gap-2">
+                            <HiPause className="h-10 w-10 text-yellow-300" />
+                            <span className="text-[10px] text-yellow-300 font-medium tracking-wider uppercase">Running</span>
+                          </div>
                         </div>
                       )}
                       {hoveredBuild === build.path && !isActive && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
-                          <HiPlay className="h-16 w-16 text-gray-400/90" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] transition-all">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/40">
+                              <HiPlay className="h-5 w-5 text-black ml-0.5" />
+                            </div>
+                            <span className="text-[10px] text-white font-medium tracking-wider uppercase">Launch</span>
+                          </div>
                         </div>
                       )}
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-white text-lg">{build.version}</span>
-                        <span className="text-gray-400 text-sm">
-                          {versionNumber <= 10.4
-                            ? "Chapter 1"
-                            : versionNumber <= 18.4
-                            ? "Chapter 2"
-                            : "Chapter 3"}
-                        </span>
+
+                      <div className="absolute top-2 right-2">
+                        <span className="text-[10px] text-gray-300 bg-black/50 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded-full">{chapter}</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400 text-sm truncate">{build.real}</span>
+                    </div>
+
+                    <div className="p-3.5">
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-white text-sm">v{build.version}</p>
+                          <p className="text-[11px] text-gray-500 truncate mt-0.5">{build.real}</p>
+                        </div>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (buildState && buildState.remove) {
-                              buildState.remove(build.path);
-                            }
+                            buildState?.remove?.(build.path);
                           }}
-                          className="text-gray-500 hover:text-red-400 focus:outline-none cursor-pointer"
-                          aria-label={`Remove build ${build.version}`}
+                          className="p-1.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                          aria-label={`Remove v${build.version}`}
                         >
-                          <HiTrash className="h-5 w-5" />
+                          <HiTrash className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div className="fixed bottom-6 right-6 flex gap-3">
-          <button
-            onClick={() => handleAdd()}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-[#1F2025]/40 text-white border border-white/20 rounded-md shadow-lg text-sm font-medium hover:bg-[#2F3035] transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#1F2025] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Build
-              </>
-            )}
-          </button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </motion.main>
 
-      {isDialogOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
-        >
+      {/* Close Game Dialog */}
+      <AnimatePresence>
+        {isDialogOpen && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 15, stiffness: 300 }}
-            className="bg-[#080a0f]/80 shadow-lg backdrop-blur-sm border border-white/10 p-6 rounded-lg max-w-sm w-full mx-4 relative overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-orange-500/20 opacity-30" />
-            <button
-              onClick={() => setIsDialogOpen(false)}
-              className="absolute top-2 right-2 text-white hover:text-gray-300"
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-zinc-900 border border-white/10 p-6 rounded-2xl max-w-sm w-full mx-4 shadow-2xl"
             >
-              <X size={24} />
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-white relative z-10">Close Game</h2>
-            <p className="mb-6 text-white relative z-10">
-              Are you sure you want to close your game?
-            </p>
-            <div className="flex justify-end space-x-4 relative z-10">
-              <button
-                className="px-4 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors duration-200"
-                onClick={() => setIsDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200"
-                onClick={handleClose}
-              >
-                Close Game
-              </button>
-            </div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                  <X className="w-5 h-5 text-red-400" />
+                </div>
+                <h2 className="text-base font-bold text-white">Close Game</h2>
+              </div>
+              <p className="text-sm text-gray-400 mb-6">Are you sure you want to close your game?</p>
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-400 text-white rounded-xl text-sm font-semibold transition-colors"
+                  onClick={handleClose}
+                >
+                  Close Game
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
 
+      {/* Download Modal */}
       <AnimatePresence>
         {isDownloadModalOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{
-                type: "spring",
-                damping: 25,
-                stiffness: 300,
-              }}
-              className="relative mx-4 w-full max-w-md overflow-hidden rounded-xl border border-cyan-500/30 bg-[#080a0f]/80 p-6 shadow-xl backdrop-blur-md"
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative mx-4 w-full max-w-md overflow-hidden rounded-2xl border border-yellow-400/20 bg-zinc-900 p-6 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative z-10">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-white">Downloading Files</h2>
-                  {downloadProgress.completed.length === downloadProgress.files.length && (
-                    <button
-                      onClick={() => setIsDownloadModalOpen(false)}
-                      className="rounded-full p-1 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
-
-                <div className="mb-5">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-300">
-                      {downloadProgress.completed.length}/{downloadProgress.files.length} files
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {Math.round(
-                        downloadProgress.files.length > 0
-                          ? (downloadProgress.completed.length / downloadProgress.files.length) *
-                              100
-                          : 0
-                      )}
-                      % complete
-                    </span>
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-8 h-8">
+                    <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                    <div className="absolute inset-0 rounded-full border-2 border-t-yellow-300 border-r-yellow-300/40 border-b-transparent border-l-transparent animate-spin" />
                   </div>
-
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${
-                          downloadProgress.files.length > 0
-                            ? (downloadProgress.completed.length / downloadProgress.files.length) *
-                              100
-                            : 0
-                        }%`,
-                      }}
-                      transition={{ type: "spring", damping: 20, stiffness: 60 }}
-                      className="h-full rounded-full bg-cyan-500"
-                    />
-                  </div>
+                  <h2 className="text-sm font-semibold text-white">Downloading Files</h2>
                 </div>
+                {downloadProgress.completed.length === downloadProgress.files.length && (
+                  <button
+                    onClick={() => setIsDownloadModalOpen(false)}
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
 
-                <div className="rounded-lg bg-white/5 p-2">
-                  <AnimatePresence mode="wait">
-                    {downloadProgress.files.map((file) => {
-                      const isCurrentFile =
-                        !downloadProgress.completed.includes(file) &&
-                        downloadProgress.files.indexOf(file) ===
-                          downloadProgress.files.findIndex(
-                            (f) => !downloadProgress.completed.includes(f)
-                          );
+              <div className="mb-4">
+                <div className="mb-2 flex items-center justify-between text-xs">
+                  <span className="text-gray-400">{downloadProgress.completed.length}/{downloadProgress.files.length} files</span>
+                  <span className="text-gray-500">
+                    {Math.round(downloadProgress.files.length > 0 ? (downloadProgress.completed.length / downloadProgress.files.length) * 100 : 0)}%
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${downloadProgress.files.length > 0 ? (downloadProgress.completed.length / downloadProgress.files.length) * 100 : 0}%` }}
+                    transition={{ type: "spring", damping: 20, stiffness: 60 }}
+                    className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-yellow-300"
+                  />
+                </div>
+              </div>
 
-                      const isLastCompleted =
-                        downloadProgress.completed.length === downloadProgress.files.length &&
-                        file === downloadProgress.files[downloadProgress.files.length - 1];
+              <div className="rounded-xl bg-white/[0.03] border border-white/5 p-2 space-y-1">
+                <AnimatePresence mode="wait">
+                  {downloadProgress.files.map((file) => {
+                    const isCurrentFile =
+                      !downloadProgress.completed.includes(file) &&
+                      downloadProgress.files.indexOf(file) === downloadProgress.files.findIndex((f) => !downloadProgress.completed.includes(f));
+                    const isLastCompleted =
+                      downloadProgress.completed.length === downloadProgress.files.length &&
+                      file === downloadProgress.files[downloadProgress.files.length - 1];
+                    if (!isCurrentFile && !isLastCompleted) return null;
 
-                      if (!isCurrentFile && !isLastCompleted) return null;
+                    const isCompleted = downloadProgress.completed.includes(file);
+                    const fileExtension = file.split(".").pop();
+                    const downloadSpeed = downloadProgress.speeds?.[file] || 0;
+                    const progress = downloadProgress.progress?.[file] || 0;
+                    const statusMessage = downloadProgress.messages?.[file] || "";
+                    const isError = statusMessage.startsWith("Error");
 
-                      const isCompleted = downloadProgress.completed.includes(file);
-                      const fileExtension = file.split(".").pop();
-                      const downloadSpeed = downloadProgress.speeds?.[file] || 0;
-                      const progress = downloadProgress.progress?.[file] || 0;
-                      const statusMessage = downloadProgress.messages?.[file] || "";
-                      const isError = statusMessage.startsWith("Error");
-
-                      return (
-                        <motion.div
-                          key={file}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          transition={{
-                            enter: { duration: 0.3 },
-                            exit: { duration: 0.2 },
-                          }}
-                          className={`flex items-center rounded-lg ${
-                            isError
-                              ? "bg-red-900/30"
-                              : isCompleted
-                              ? "bg-white/5"
-                              : "bg-white/[0.03]"
-                          } p-2.5 transition-colors`}
-                        >
-                          <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-md bg-white/10 text-gray-300">
-                            <FileText className="h-4 w-4" />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-medium text-gray-200">{file}</p>
-                            <div className="flex flex-col">
-                              <p className="text-xs text-gray-400">
-                                {fileExtension?.toUpperCase()} file
-                              </p>
-                              {statusMessage && (
-                                <p
-                                  className={`text-xs mt-1 ${
-                                    isError ? "text-red-400" : "text-gray-400"
-                                  }`}
-                                >
-                                  {statusMessage}
-                                </p>
-                              )}
-                              {!isCompleted && (
-                                <div className="mt-1">
-                                  <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-cyan-400/80 rounded-full"
-                                      style={{ width: `${progress}%` }}
-                                    />
-                                  </div>
-                                  <div className="flex justify-between text-xs mt-1">
-                                    <span className="text-cyan-300">{Math.round(progress)}%</span>
-                                    {downloadSpeed > 0 && (
-                                      <span className="text-cyan-300">
-                                        {downloadSpeed.toFixed(1)} MB/s
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="ml-3 flex-shrink-0">
-                            {isError ? (
-                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-900/50 text-red-400">
-                                <X className="h-3.5 w-3.5" />
-                              </div>
-                            ) : isCompleted ? (
-                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-green-400">
-                                <FileText className="h-3.5 w-3.5" />
-                              </div>
-                            ) : (
-                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-cyan-400">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-
-                    {downloadProgress.completed.length === downloadProgress.files.length && (
+                    return (
                       <motion.div
-                        initial={{ opacity: 0, y: 5 }}
+                        key={file}
+                        initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 text-center text-sm text-green-400"
+                        exit={{ opacity: 0, y: -4 }}
+                        className={`flex items-center gap-3 rounded-lg p-2.5 ${isError ? "bg-red-500/10" : isCompleted ? "bg-white/[0.03]" : "bg-white/[0.02]"}`}
                       >
-                        All downloads completed!
+                        <div className="shrink-0 w-8 h-8 rounded-lg bg-white/5 border border-white/[0.06] flex items-center justify-center">
+                          <FileText className="h-3.5 w-3.5 text-gray-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate text-xs font-medium text-gray-200">{file}</p>
+                          {statusMessage && (
+                            <p className={`text-[10px] mt-0.5 ${isError ? "text-red-400" : "text-gray-500"}`}>{statusMessage}</p>
+                          )}
+                          {!isCompleted && !isError && (
+                            <div className="mt-1.5">
+                              <div className="h-0.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full bg-yellow-300 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                              </div>
+                              <div className="flex justify-between text-[10px] mt-1 text-gray-500">
+                                <span>{Math.round(progress)}%</span>
+                                {downloadSpeed > 0 && <span>{downloadSpeed.toFixed(1)} MB/s</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0">
+                          {isError ? (
+                            <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center">
+                              <X className="h-3 w-3 text-red-400" />
+                            </div>
+                          ) : isCompleted ? (
+                            <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                              <FileText className="h-3 w-3 text-green-400" />
+                            </div>
+                          ) : (
+                            <div className="relative w-6 h-6">
+                              <div className="absolute inset-0 rounded-full border border-white/5" />
+                              <div className="absolute inset-0 rounded-full border border-t-yellow-300 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                    );
+                  })}
+                  {downloadProgress.completed.length === downloadProgress.files.length && downloadProgress.files.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="pt-2 text-center text-xs text-green-400 font-medium"
+                    >
+                      All downloads complete!
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </motion.div>

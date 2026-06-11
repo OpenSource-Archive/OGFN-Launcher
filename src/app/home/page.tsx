@@ -58,7 +58,7 @@ export default function HomePage() {
 
   const getStoredUser = () => {
     try {
-      const raw = localStorage.getItem("splash.auth.user");
+      const raw = localStorage.getItem("classified.auth.user");
       if (raw) return JSON.parse(raw);
     } catch {
     }
@@ -194,7 +194,31 @@ export default function HomePage() {
     };
   }, [user?.accountId]);
 
-  const heroNews = news[0] ?? { title: "Welcome to Classified", body: "A custom Fortnite private server experience built for the community.", image: "/news.png" };
+  const heroNews = news[0] ?? { title: "Welcome to Classified", body: "A custom Fortnite private server experience built for the community.", image: "/Battle_Pass_29_-_Fortnite.webp" };
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-black text-white overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+              <div className="absolute inset-0 rounded-full border-2 border-t-yellow-300 border-r-yellow-300/50 border-b-transparent border-l-transparent animate-spin" />
+              <div className="absolute inset-2 rounded-full border border-t-yellow-200/30 border-transparent animate-spin" style={{ animationDuration: "1.5s", animationDirection: "reverse" }} />
+            </div>
+            <p className="text-xs text-gray-500 tracking-widest uppercase">Loading</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden">
@@ -202,13 +226,17 @@ export default function HomePage() {
 
       <motion.main
         className="flex-1 flex flex-col overflow-y-auto"
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         {updateAvailable && !updateDismissed && (
-          <div className="flex items-center justify-between px-5 py-2.5 bg-yellow-500/10 border-b border-yellow-500/20 text-sm">
-            <div className="flex items-center gap-2 text-yellow-300">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between px-5 py-2.5 bg-yellow-300/10 border-b border-yellow-300/20 text-sm"
+          >
+            <div className="flex items-center gap-2 text-yellow-200">
               <Download className="w-4 h-4 shrink-0" />
               <span>Update available — <strong>v{updateVersion}</strong>. Restart to install.</span>
             </div>
@@ -223,7 +251,7 @@ export default function HomePage() {
                   } catch { setUpdating(false); }
                 }}
                 disabled={updating}
-                className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white rounded text-xs font-medium transition-colors"
+                className="px-3 py-1 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black rounded text-xs font-semibold transition-colors"
               >
                 {updating ? "Installing…" : "Install Now"}
               </button>
@@ -231,193 +259,170 @@ export default function HomePage() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
-        <div className="flex justify-between items-center px-6 pt-5 pb-2">
+
+        {/* Header */}
+        <div className="flex justify-between items-center px-7 pt-6 pb-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-white">
               {(() => {
                 const h = new Date().getHours();
                 return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-              })()}, <span className="text-yellow-400">{user?.displayName || user?.username || "Player"}</span>!
+              })()},{" "}
+              <span className="text-yellow-300">{user?.displayName || user?.username || "Player"}</span>
             </h1>
-            <p className="text-sm text-gray-400 mt-0.5">{status.activeLauncherUsers ?? 0} Players Online</p>
+            <p className="text-xs text-gray-500 mt-0.5 tracking-wide">{status.activeLauncherUsers ?? 0} players in launcher right now</p>
           </div>
 
-          <div className="rounded-xl bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg p-3 w-60">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-yellow-500 to-amber-400 flex items-center justify-center">
-                  {(user as any)?.avatar ? (
-                    <img src={(user as any).avatar} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xs font-bold text-black">
-                      {(user?.displayName || user?.username || "P").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-[#05070a]" />
+          <div className="flex items-center gap-3 bg-zinc-900/60 border border-yellow-400/15 rounded-xl px-4 py-2.5 backdrop-blur-sm">
+            <div className="relative">
+              <div className="h-8 w-8 rounded-full overflow-hidden bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-2 ring-yellow-300/20">
+                {(user as any)?.avatar ? (
+                  <img src={(user as any).avatar} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-black">
+                    {(user?.displayName || user?.username || "P").charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
-              <div className="flex flex-col">
-                <h3 className="font-medium text-white text-xs">
-                  {user?.displayName || user?.username || "Player"}
-                </h3>
-                <span className="text-[11px] text-gray-400">Online</span>
-              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-black" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-white leading-none">{user?.displayName || user?.username || "Player"}</p>
+              <p className="text-[10px] text-green-400 mt-0.5">Online</p>
             </div>
           </div>
         </div>
 
-        <div className="px-6 pb-6 space-y-3">
-          <div className="relative h-[200px] overflow-hidden rounded-xl shadow-lg group cursor-pointer border border-white/5" onClick={() => router.push("/library")}>
-              <div className="absolute inset-0">
-                <img
-                  src={heroNews.image}
-                  alt={heroNews.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/news.png";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
+        <div className="px-7 pb-7 space-y-4">
+          {/* Hero banner */}
+          <div
+            className="relative h-[220px] overflow-hidden rounded-2xl cursor-pointer group border border-white/5 shadow-2xl"
+            onClick={() => router.push("/library")}
+          >
+            <img
+              src={heroNews.image}
+              alt={heroNews.title}
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+              onError={(e) => { (e.target as HTMLImageElement).src = "/Battle_Pass_29_-_Fortnite.webp"; }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
 
-              <div className="absolute bottom-3 right-3">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push("/library");
-                  }}
-                  className="w-12 h-12 bg-yellow-500 hover:bg-yellow-400 rounded-full flex items-center justify-center shadow-lg shadow-yellow-500/30 transition-all hover:scale-110"
-                >
-                  <Play className="w-5 h-5 text-black fill-black ml-0.5" />
-                </button>
-              </div>
+            <div className="absolute bottom-4 left-5 max-w-[65%]">
+              <p className="text-[10px] text-yellow-300/80 uppercase tracking-widest font-medium mb-1">Featured</p>
+              <h2 className="text-base font-bold text-white leading-tight">{heroNews.title}</h2>
+              <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">{heroNews.body}</p>
+            </div>
 
-              <div className="absolute bottom-3 left-4 max-w-[70%]">
-                <h2 className="text-sm font-bold text-white truncate">
-                  {heroNews.title}
-                </h2>
-                <p className="text-[11px] text-gray-300/80 line-clamp-1">
-                  {heroNews.body}
-                </p>
-              </div>
+            <div className="absolute bottom-4 right-4">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); router.push("/library"); }}
+                className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold rounded-full shadow-lg shadow-yellow-400/25 transition-all hover:scale-105 active:scale-95"
+              >
+                <Play className="w-3.5 h-3.5 fill-black" />
+                Play Now
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex-1 bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
-              <h2 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-                Launcher Updates
-              </h2>
+
+          {/* Main grid */}
+          <div className="grid grid-cols-3 gap-4">
+            {/* Commits — spans 2 cols */}
+            <div className="col-span-2 bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <svg className="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                <h2 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Launcher Updates</h2>
+              </div>
               {commits.length === 0 ? (
-                <div className="flex items-center justify-center h-24 rounded-lg bg-white/5 border border-white/5">
-                  <p className="text-xs text-gray-500">No updates yet — push a commit to see activity</p>
+                <div className="flex items-center justify-center h-24 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+                  <p className="text-xs text-gray-600">No recent updates</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  {commits.map((commit) => (
+                  {commits.slice(0, 4).map((commit) => (
                     <a
                       key={commit.id}
                       href={commit.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-3 rounded-lg bg-white/5 hover:bg-white/[0.08] transition-all border border-white/5 block"
+                      className="p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-all border border-white/[0.04] block group/commit"
                     >
-                      <p className="text-[10px] text-gray-500 mb-1">
-                        {new Date(commit.date).toLocaleString("en-US", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })}
+                      <p className="text-[10px] text-gray-600 mb-1">
+                        {new Date(commit.date).toLocaleString("en-US", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })}
                         {commit.repo ? ` · ${commit.repo}` : ""}
                       </p>
-                      <h3 className="font-semibold text-xs text-white truncate mb-1">{commit.message}</h3>
-                      <p className="text-[10px] text-gray-400">by {commit.author}</p>
+                      <h3 className="font-medium text-xs text-gray-200 group-hover/commit:text-white truncate mb-1 transition-colors">{commit.message}</h3>
+                      <p className="text-[10px] text-gray-500">by {commit.author}</p>
                     </a>
                   ))}
                 </div>
               )}
             </div>
-            <div className="w-full lg:w-[280px] space-y-3">
-              <div className="bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
-                <h2 className="text-sm font-semibold text-yellow-400 mb-2">Status</h2>
-                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        status.status === "online"
-                          ? "bg-green-400"
-                          : status.status === "maintenance"
-                          ? "bg-yellow-400"
-                          : "bg-red-400"
-                      }`}
-                    />
-                    <span className="text-[11px] text-gray-400 uppercase tracking-wider">
-                      {status.status}
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-white">{status.playersOnline}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5">players in-game</p>
+
+            {/* Right column */}
+            <div className="flex flex-col gap-4">
+              {/* Status */}
+              <div className="bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-4 backdrop-blur-sm">
+                <h2 className="text-xs font-semibold text-yellow-300/80 uppercase tracking-wider mb-3">Server Status</h2>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    status.status === "online" ? "bg-yellow-400 shadow-[0_0_6px_#4ade80]"
+                    : status.status === "maintenance" ? "bg-yellow-300 shadow-[0_0_6px_#fde047]"
+                    : "bg-red-400 shadow-[0_0_6px_#f87171]"
+                  }`} />
+                  <span className="text-xs text-gray-400 capitalize">{status.status}</span>
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
-                  <Users className="w-3 h-3 text-yellow-400" />
-                  <span>{status.activeLauncherUsers ?? 0} active in launcher</span>
+                <p className="text-3xl font-bold text-white tabular-nums">{status.playersOnline}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">in-game</p>
+                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <Users className="w-3 h-3 text-yellow-300/60" />
+                  <span>{status.activeLauncherUsers ?? 0} in launcher</span>
                 </div>
               </div>
 
-              <div className="bg-zinc-950/80 backdrop-blur-sm border border-white/10 shadow-lg rounded-xl p-4">
+              {/* Friends */}
+              <div className="flex-1 bg-zinc-900/40 border border-white/[0.06] rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-yellow-400 flex items-center gap-1.5">
+                  <h2 className="text-xs font-semibold text-yellow-300/80 uppercase tracking-wider flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" />
                     Friends
                   </h2>
-                  <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-md">
-                    {friends.length} online
-                  </span>
+                  <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{friends.length}</span>
                 </div>
                 {friends.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {friends.slice(0, 4).map((friend) => (
-                      <div
-                        key={friend.id}
-                        className="flex items-center gap-2.5 p-2 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-all"
-                      >
-                        <div className="relative">
-                          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-yellow-400/20 to-amber-400/20 flex items-center justify-center">
-                            <span className="text-[10px] font-bold text-yellow-300">
-                              {friend.username.charAt(0).toUpperCase()}
-                            </span>
+                      <div key={friend.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors">
+                        <div className="relative shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-yellow-400/20 to-amber-400/10 border border-white/5 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-yellow-200">{friend.username.charAt(0).toUpperCase()}</span>
                           </div>
-                          <span
-                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080a0f] ${
-                              friend.status === "playing"
-                                ? "bg-emerald-400"
-                                : friend.status === "online"
-                                ? "bg-green-400"
-                                : friend.status === "away"
-                                ? "bg-yellow-400"
-                                : "bg-gray-500"
-                            }`}
-                          />
+                          <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black ${
+                            friend.status === "playing" ? "bg-emerald-400"
+                            : friend.status === "online" ? "bg-green-400"
+                            : friend.status === "away" ? "bg-yellow-300"
+                            : "bg-gray-600"
+                          }`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-white truncate">
-                            {friend.username}
-                          </p>
-                          <p className="text-[10px] text-gray-500 truncate">
-                            {friend.status === "playing" && friend.location
-                              ? `Playing ${friend.location}`
-                              : friend.status}
+                          <p className="text-xs text-white truncate">{friend.username}</p>
+                          <p className="text-[10px] text-gray-500 truncate capitalize">
+                            {friend.status === "playing" && friend.location ? `Playing ${friend.location}` : friend.status}
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-4 text-gray-500">
-                    <Users className="w-6 h-6 mb-1.5 opacity-30" />
-                    <span className="text-[11px]">No friends online</span>
+                  <div className="flex flex-col items-center justify-center py-5 text-gray-600">
+                    <Users className="w-5 h-5 mb-1.5 opacity-40" />
+                    <span className="text-[10px]">No friends online</span>
                   </div>
                 )}
               </div>
-
             </div>
           </div>
         </div>

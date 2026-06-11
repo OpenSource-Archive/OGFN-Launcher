@@ -147,7 +147,9 @@ export const handleAddBuild = async () => {
 
     buildState.add(selectedPath.toString(), data);
     return true;
-  } catch {
-    sendNotification({ title: "Classified", body: "Error adding build!" });
+  } catch (err: any) {
+    console.error("Add build error:", err);
+    const msg = err?.toString?.() || String(err);
+    sendNotification({ title: "Classified", body: `Error adding build: ${msg}` });
   }
 };

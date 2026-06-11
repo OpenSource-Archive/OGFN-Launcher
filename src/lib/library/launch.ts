@@ -39,20 +39,54 @@ export const launchBuild = async (selectedPath: string, version: string) => {
       sound: "ms-winsoundevent:Notification.Default",
     });
 
+    let exchangeCode: string | null = null;
+    try {
+      const exchangeRes = await apiClient.post("/launcher/api/auth/exchange", {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      exchangeCode = exchangeRes.data?.exchangeCode || null;
+    } catch (apiErr: any) {
+      console.error("Exchange code error:", apiErr);
+      sendNotification({
+        title: "Classified",
+        body: `Exchange code failed: ${apiErr?.response?.data?.error || apiErr?.message || "Backend unreachable"}`,
+        sound: "ms-winsoundevent:Notification.Default",
+      });
+      return false;
+    }
+
+    if (!exchangeCode) {
+      sendNotification({
+        title: "Classified",
+        body: "Backend did not return an exchange code.",
+        sound: "ms-winsoundevent:Notification.Default",
+      });
+      return false;
+    }
+
     await invoke("experience", {
       folderPath: selectedPath.replace("/", "\\"),
-      exchangeCode: token,
+      exchangeCode: exchangeCode,
       isDev: false,
       eor: buildstate.EorEnabled,
       dpe: buildstate.DisablePreEdits,
       ror: buildstate.ResetOnRelease,
       version,
+      eventPlaylist: null,
     });
 
     appWindow.minimize();
 
     return true;
-  } catch {
+  } catch (err: any) {
+    console.error("Launch error:", err);
+    sendNotification({
+      title: "Classified",
+      body: err?.toString?.() || "Failed to launch game.",
+      sound: "ms-winsoundevent:Notification.Default",
+    });
     return false;
   }
 };
