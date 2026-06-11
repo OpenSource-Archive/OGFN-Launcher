@@ -6,6 +6,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { listen } from "@tauri-apps/api/event";
 import { apiClient } from "@/lib/api/client";
 import useBuildsStore from "@/lib/stores/builds";
+import { API_URL } from "@/lib/config";
 
 export const launchBuild = async (selectedPath: string, version: string) => {
   const appWindow = getCurrentWebviewWindow();
@@ -75,6 +76,7 @@ export const launchBuild = async (selectedPath: string, version: string) => {
       ror: buildstate.ResetOnRelease,
       version,
       eventPlaylist: null,
+      backendUrl: API_URL,
     });
 
     appWindow.minimize();

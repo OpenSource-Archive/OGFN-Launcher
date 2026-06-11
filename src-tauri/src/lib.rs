@@ -148,6 +148,7 @@ fn experience(
     is_dev: bool,
     eor: bool,
     version: String,
+    backend_url: String,
 ) -> Result<bool, String> {
     exit();
     std::thread::sleep(std::time::Duration::from_secs(2));
@@ -180,7 +181,7 @@ fn experience(
         );
 
         if !is_dev {
-            let _ = download_file(&format!("{}/launcher/api/redirect", BACKEND_URL), &game_dll);
+            let _ = download_file(&format!("{}/launcher/api/redirect", backend_url), &game_dll);
         } else {
             let _ = std::fs::copy("parkieputhere", &game_dll);
         }
@@ -202,7 +203,7 @@ fn experience(
             }
         }
 
-        let _ = download_file(&format!("{}/launcher/api/redirect", BACKEND_URL), &game_dll1);
+        let _ = download_file(&format!("{}/launcher/api/redirect", backend_url), &game_dll1);
 
         let mut game_dll2 = game_path.clone();
         game_dll2.push(
@@ -221,7 +222,7 @@ fn experience(
             }
         }
 
-        let _ = download_file(&format!("{}/launcher/api/redirect", BACKEND_URL), &game_dll2);
+        let _ = download_file(&format!("{}/launcher/api/redirect", backend_url), &game_dll2);
     }
 
     let mut game_real = game_path.clone();
