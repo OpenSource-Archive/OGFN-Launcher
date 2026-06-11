@@ -661,7 +661,13 @@ pub fn run() {
                     )?;
             }
 
-            let window = app.get_webview_window("main").unwrap();
+            let window = match app.get_webview_window("main") {
+                Some(w) => w,
+                None => {
+                    eprintln!("Main window not found during setup");
+                    return Ok(());
+                }
+            };
 
             window.on_window_event(|event| {
                 match event {

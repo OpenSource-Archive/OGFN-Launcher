@@ -8,6 +8,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { useSessionStore } from "@/lib/stores/session";
 import { apiClient } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/splash-endpoints";
+import { API_URL } from "@/lib/config";
 import Sidebar from "@/components/layout/Sidebar";
 
 export default function SettingsPage() {
@@ -33,8 +34,13 @@ export default function SettingsPage() {
   const currentAvatar = mounted ? ((user as any)?.avatar || null) : null;
 
   const handleLogout = () => {
-    auth.logout();
-    router.push("/");
+    const goodbyeAudio = new Audio(`${API_URL}/api/music/welcome.mp3`);
+    goodbyeAudio.volume = 0.5;
+    goodbyeAudio.play().catch(() => {});
+    setTimeout(() => {
+      auth.logout();
+      router.push("/");
+    }, 2000);
   };
 
   const handleAvatarSave = async () => {

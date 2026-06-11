@@ -22,6 +22,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { open } from "@tauri-apps/plugin-shell";
 import { listen } from "@tauri-apps/api/event";
 import { apiClient } from "@/lib/api/client";
+import { API_URL } from "@/lib/config";
 
 export default function LoginPage() {
   const session = useSessionStore();
@@ -109,26 +110,16 @@ export default function LoginPage() {
             session.setToken(pollData.token, user);
             setWelcomeMessage("Welcome Back");
             setWelcomeUser(user?.displayName || user?.accountId || "Agent");
-            welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+            welcomeAudioRef.current = new Audio(`${API_URL}/api/music/welcome.mp3`);
             welcomeAudioRef.current.volume = 0.5;
             welcomeAudioRef.current.play().catch(() => {});
-            lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+            lobbyAudioRef.current = new Audio(`${API_URL}/api/music/lobby.mp3`);
             lobbyAudioRef.current.loop = true;
             lobbyAudioRef.current.currentTime = 35;
-            lobbyAudioRef.current.volume = 0;
+            lobbyAudioRef.current.volume = 0.15;
             lobbyAudioRef.current.play().catch(() => {});
-            let fadeVol = 0;
-            const fadeInterval = setInterval(() => {
-              fadeVol += 0.005;
-              if (fadeVol >= 0.15) {
-                fadeVol = 0.15;
-                clearInterval(fadeInterval);
-              }
-              if (lobbyAudioRef.current) lobbyAudioRef.current.volume = fadeVol;
-            }, 100);
             setTimeout(() => {
               if (welcomeAudioRef.current) welcomeAudioRef.current.pause();
-              if (lobbyAudioRef.current) lobbyAudioRef.current.pause();
               window.location.href = "/home";
             }, 5000);
           }
@@ -173,10 +164,10 @@ export default function LoginPage() {
           session.setToken(data.token, user);
           setWelcomeMessage("Welcome Back");
           setWelcomeUser(user?.displayName || user?.accountId || "Agent");
-          welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+          welcomeAudioRef.current = new Audio(`${API_URL}/api/music/welcome.mp3`);
           welcomeAudioRef.current.volume = 0.5;
           welcomeAudioRef.current.play().catch(() => {});
-          lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+          lobbyAudioRef.current = new Audio(`${API_URL}/api/music/lobby.mp3`);
           lobbyAudioRef.current.loop = true;
           lobbyAudioRef.current.currentTime = 35;
           lobbyAudioRef.current.volume = 0;
@@ -284,10 +275,10 @@ export default function LoginPage() {
       setWelcomeMessage("Welcome Back");
       const currentUser = session.user || legacyAuth.user;
       setWelcomeUser(currentUser?.displayName || currentUser?.accountId || "Agent");
-      welcomeAudioRef.current = new Audio("/api/music/welcome.mp3");
+      welcomeAudioRef.current = new Audio(`${API_URL}/api/music/welcome.mp3`);
       welcomeAudioRef.current.volume = 0.5;
       welcomeAudioRef.current.play().catch(() => {});
-      lobbyAudioRef.current = new Audio("/api/music/lobby.mp3");
+      lobbyAudioRef.current = new Audio(`${API_URL}/api/music/lobby.mp3`);
       lobbyAudioRef.current.loop = true;
       lobbyAudioRef.current.currentTime = 35;
       lobbyAudioRef.current.volume = 0;

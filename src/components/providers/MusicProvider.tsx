@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import useMusicStore from "@/lib/stores/music";
+import { API_URL } from "@/lib/config";
 
 export default function MusicProvider() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -56,8 +57,8 @@ export default function MusicProvider() {
       const token = localStorage.getItem("classified.auth.token");
       if (token) {
         const currentSrc = useMusicStore.getState().src;
-        if (currentSrc !== "/api/music/lobby.mp3") {
-          setSrc("/api/music/lobby.mp3");
+        if (currentSrc !== `${API_URL}/api/music/lobby.mp3`) {
+          setSrc(`${API_URL}/api/music/lobby.mp3`);
         }
       } else {
         if (audioRef.current) {
@@ -65,8 +66,8 @@ export default function MusicProvider() {
           setPlaying(false);
         }
         const currentSrc = useMusicStore.getState().src;
-        if (currentSrc !== "/api/music/background.mp3") {
-          setSrc("/api/music/background.mp3");
+        if (currentSrc !== `${API_URL}/api/music/background.mp3`) {
+          setSrc(`${API_URL}/api/music/background.mp3`);
         }
       }
     };

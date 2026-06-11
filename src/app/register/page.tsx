@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { endpoints } from "@/lib/api/splash-endpoints";
 import { apiClient } from "@/lib/api/client";
+import { API_URL } from "@/lib/config";
 import { useSessionStore } from "@/lib/stores/session";
 import FlowParticles from "@/components/auth/flow-particles";
 import { listen } from "@tauri-apps/api/event";
@@ -66,10 +67,16 @@ export default function RegisterPage() {
 
           session.setToken(data.token, user);
           setWelcomeMessage("Welcome");
-          const audio = new Audio("/api/music/welcome.mp3");
-          audio.volume = 0.5;
-          audio.play().catch(() => {});
+          const welcomeAudio = new Audio(`${API_URL}/api/music/welcome.mp3`);
+          welcomeAudio.volume = 0.5;
+          welcomeAudio.play().catch(() => {});
+          const lobbyAudio = new Audio(`${API_URL}/api/music/lobby.mp3`);
+          lobbyAudio.loop = true;
+          lobbyAudio.currentTime = 35;
+          lobbyAudio.volume = 0.15;
+          lobbyAudio.play().catch(() => {});
           setTimeout(() => {
+            welcomeAudio.pause();
             router.push("/home");
           }, 4000);
         } catch {
@@ -126,10 +133,16 @@ export default function RegisterPage() {
               : null;
             session.setToken(pollData.token, user);
             setWelcomeMessage("Welcome");
-            const audio = new Audio("/api/music/welcome.mp3");
-            audio.volume = 0.5;
-            audio.play().catch(() => {});
+            const welcomeAudio = new Audio(`${API_URL}/api/music/welcome.mp3`);
+            welcomeAudio.volume = 0.5;
+            welcomeAudio.play().catch(() => {});
+            const lobbyAudio = new Audio(`${API_URL}/api/music/lobby.mp3`);
+            lobbyAudio.loop = true;
+            lobbyAudio.currentTime = 35;
+            lobbyAudio.volume = 0.15;
+            lobbyAudio.play().catch(() => {});
             setTimeout(() => {
+              welcomeAudio.pause();
               router.push("/home");
             }, 4000);
           }
@@ -209,10 +222,16 @@ export default function RegisterPage() {
 
       session.setToken(data.token, user);
       setWelcomeMessage("Welcome");
-      const audio = new Audio("/api/music/welcome.mp3");
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
+      const welcomeAudio = new Audio(`${API_URL}/api/music/welcome.mp3`);
+      welcomeAudio.volume = 0.5;
+      welcomeAudio.play().catch(() => {});
+      const lobbyAudio = new Audio(`${API_URL}/api/music/lobby.mp3`);
+      lobbyAudio.loop = true;
+      lobbyAudio.currentTime = 35;
+      lobbyAudio.volume = 0.15;
+      lobbyAudio.play().catch(() => {});
       setTimeout(() => {
+        welcomeAudio.pause();
         router.push("/home");
       }, 4000);
     } catch (err: any) {
