@@ -671,15 +671,14 @@ pub fn run() {
                 }
             });
 
-            tauri_plugin_deep_link
-                ::register("splash", move |request| {
-                    if let Err(err) = window.set_focus() {
-                        eprintln!("Could not set focus on main window: {:?}", err);
-                    }
-
-                    let _ = window.emit("deep-link", request);
-                })
-                .unwrap();
+            if let Err(e) = tauri_plugin_deep_link::register("splash", move |request| {
+                if let Err(err) = window.set_focus() {
+                    eprintln!("Could not set focus on main window: {:?}", err);
+                }
+                let _ = window.emit("deep-link", request);
+            }) {
+                eprintln!("Deep link registration failed (expected if not installed): {:?}", e);
+            }
             Ok(())
         })
         .invoke_handler(
