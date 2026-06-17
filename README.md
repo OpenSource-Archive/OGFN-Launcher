@@ -1,1 +1,3 @@
-Launcher For Splash, Created By s3cw 
+PLEASE GIVE CREDITS THIS IS AMAZING BUT ALSO A BIT SKUNKED THANKS -s3cw
+
+ps Authies go fuck yourself
